@@ -1,6 +1,5 @@
 Package: NPE
 Type: Package
-<<<<<<< HEAD
 Title: Non-Parametric Estimators
 Version: 1.0
 Date: 2020-08-03
@@ -11,20 +10,8 @@ Description: Functions for calculating a variety of nonparametric estimators, in
 	It also implements the nonparametric statistics of the Wilcoxon Signed Rank test, the Mann-Whitney-Wilcoxon
 	Rank Sum test, and the Kruskal-Wallis test. It also implements PCA.
 License: MPL-2.0
-=======
-Title: What the package does (short line)
-Version: 1.0
-Date: 2020-08-03
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
->>>>>>> 4f33de686aff7ae07e38a7afd108d8eeeed0dbb6
 Imports: Rcpp (>= 1.0.4.6), RcppParallel
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel, BH
 SystemRequirements: GNU make
 RoxygenNote: 7.1.0
-<<<<<<< HEAD
 Encoding: UTF-8
-=======
->>>>>>> 4f33de686aff7ae07e38a7afd108d8eeeed0dbb6

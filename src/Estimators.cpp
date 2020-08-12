@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 #define STRICT_R_HEADERS
-=======
->>>>>>> 4f33de686aff7ae07e38a7afd108d8eeeed0dbb6
 #include <algorithm>
 
 // [[Rcpp::depends(RcppParallel)]]
