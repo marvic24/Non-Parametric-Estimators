@@ -1,0 +1,17 @@
+Package: NPE
+Type: Package
+Title: Non-Parametric Estimators
+Version: 1.0
+Date: 2020-08-03
+Author: Sumit Sethi
+Maintainer: Sumit Sethi <sumit.sethi@nyu.edu>
+Description: Functions for calculating a variety of nonparametric estimators, including estimators of location
+	(median, Hodges-Lehmann), of dispersion (Median Absolute Deviation), and ofdependency-covariance (Theil-Sen).
+	It also implements the nonparametric statistics of the Wilcoxon Signed Rank test, the Mann-Whitney-Wilcoxon
+	Rank Sum test, and the Kruskal-Wallis test. It also implements PCA.
+License: MPL-2.0
+Imports: Rcpp (>= 1.0.4.6), RcppParallel
+LinkingTo: Rcpp, RcppArmadillo, RcppParallel, BH
+SystemRequirements: GNU make
+RoxygenNote: 7.1.0
+Encoding: UTF-8
