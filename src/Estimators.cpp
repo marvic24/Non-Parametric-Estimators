@@ -33,12 +33,12 @@ using namespace arma;
 //' # Create a vector of random returns
 //' re_turns <- rnorm(1e6)
 //' # Compare med_ian() with median()
-//' all.equal(drop(HighFreq::med_ian(re_turns)), 
+//' all.equal(drop(NPE::med_ian(re_turns)), 
 //'   median(re_turns))
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=HighFreq::med_ian(re_turns),
+//'   rcpp=NPE::med_ian(re_turns),
 //'   rcode=median(re_turns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
@@ -59,31 +59,30 @@ double med_ian(const arma::vec& vec_tor)
 
 struct parallel_rolling_median : public Worker
 {
-  //input vector 
+  // Input vector 
   const RVector<double> vec_tor;
   const int look_back;
   
-  //output (pass by reference)
+  // Output (pass by reference)
   arma::vec& med_ians;
   
-  //constructor
+  // Constructor
   parallel_rolling_median(const NumericVector vec_tor,
                           const int look_back,
                           arma::vec& med_ians) : vec_tor(vec_tor), look_back(look_back), med_ians(med_ians){}
   
-  void operator()(std::size_t begin, std::size_t end){
+  void operator()(std::size_t begin, std::size_t end) {
     
-    for(std::size_t i = begin; i < end; i++)
-    {
+    for (std::size_t i = begin; i < end; i++) {
       int start_index = std::max((std::size_t)(0), (i-look_back + 1));
       arma::vec temp(i-start_index+1);
       
-      for(std::size_t j = start_index ; j<= i; j++)
+      for (std::size_t j = start_index; j <= i; j++)
         temp[j-start_index] = vec_tor[j];
       
       med_ians[i] = arma::median(temp);
-    }
-  }
+    }  // end for
+  }  // end operator
 };
 
 
@@ -111,20 +110,19 @@ struct parallel_rolling_median : public Worker
 //' # Create a vector of random returns
 //' re_turns <- rnorm(1e6)
 //' # Compare rolling_median() with roll::roll_median()
-//' all.equal(drop(HighFreq::rolling_median(re_turns)), 
-//'   roll::roll_median(re_turns))
+//' all.equal(drop(NPE::rolling_median(re_turns, look_back=11)), 
+//'   roll::roll_median(re_turns, width=11))
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   parallel_rcpp=HighFreq::rolling_median(re_turns),
+//'   parallel_rcpp=NPE::rolling_median(re_turns),
 //'   rcpp=roll::roll_median(re_turns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec rolling_median(NumericVector vec_tor, int look_back)
-{
+arma::vec rolling_median(NumericVector vec_tor, int look_back) {
   int n = vec_tor.size();
   arma::vec results(n);
   
@@ -134,7 +132,7 @@ arma::vec rolling_median(NumericVector vec_tor, int look_back)
   parallelFor(1, vec_tor.length(), media_n);
   
   return results;
-}
+}  // end rolling_median
 
 
 
@@ -158,22 +156,23 @@ arma::vec rolling_median(NumericVector vec_tor, int look_back)
 //' # Create a vector of random returns
 //' re_turns <- rnorm(1e6)
 //' # Compare medianAbsoluteDeviation() with mad()
-//' all.equal(drop(HighFreq::medianAbsoluteDeviation(re_turns)), 
+//' all.equal(drop(NPE::medianAbsoluteDeviation(re_turns)), 
 //'   mad(re_turns))
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=HighFreq::medianAbsoluteDeviation(re_turns),
+//'   rcpp=NPE::medianAbsoluteDeviation(re_turns),
 //'   rcode=mad(re_turns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-double medianAbsoluteDeviation(arma::vec& vec_tor)
-{
+double medianAbsoluteDeviation(arma::vec& vec_tor) {
+  
   return med_ian(arma::abs(vec_tor - med_ian(vec_tor)));
-}
+  
+}  // end medianAbsoluteDeviation
 
 
 
@@ -183,36 +182,35 @@ double medianAbsoluteDeviation(arma::vec& vec_tor)
 //' Worker function for calculating median absolute deviation over rolling window
 //' by using parallel processing.
 
-
+// JP: Define structure 
 struct parallel_rolling_mad : public Worker
 {
-  //input vector 
+  // input vector 
   const RVector<double> vec_tor;
   int look_back;
   
-  //output (pass by reference)
+  // Output (pass by reference)
   arma::vec& m_ad;
   
-  //constructor
+  // Define constructor
   parallel_rolling_mad(const NumericVector vec_tor,
                           const int look_back,
                           arma::vec& m_ad) : vec_tor(vec_tor), look_back(look_back), m_ad(m_ad){}
   
-  void operator()(std::size_t begin, std::size_t end){
+  void operator()(std::size_t begin, std::size_t end) {
     
-    for(std::size_t i = begin; i < end; i++)
-    {
+    for (std::size_t i = begin; i < end; i++) {
       int start_index = std::max((std::size_t)(0), (i-look_back+1));
       
       arma::vec temp(i-start_index+1);
-      for(std::size_t j = start_index ; j <= i; j++)
-      {
+      
+      for (std::size_t j = start_index; j <= i; j++) {
         temp[j-start_index] = vec_tor[j];
-      }
+      }  // end if
       
       m_ad[i] = med_ian(arma::abs(temp - med_ian(temp)));
-    }
-  }
+    }  // end for
+  }  // end operator
 };
 
 
@@ -254,7 +252,7 @@ arma::vec rolling_mad(NumericVector vec_tor, int look_back)
   parallelFor(1, vec_tor.length(), ma_d);
   
   return results;
-}
+}  // end rolling_mad
 
 
 
@@ -266,28 +264,26 @@ arma::vec rolling_mad(NumericVector vec_tor, int look_back)
 
 struct pair_averages : public Worker
 {
-  //input vector 
+  // Input vector 
   const RVector<double> vec_tor;
   int n;
   
-  //output (pass by reference)
+  // Output (pass by reference)
   arma::vec& ave_rages;
   
-  //constructor
+  // Constructor
   pair_averages(const NumericVector vec_tor, arma::vec& ave_rages) : vec_tor(vec_tor), ave_rages(ave_rages){ n = vec_tor.size();}
   
   void operator()(std::size_t begin_index, std::size_t end_index){
 
-    for(std::size_t i = begin_index; i < (end_index); i++)
-    {
-      for(std::size_t j = (i+1) ; j< (size_t)(n); j++)
-      {
+    for (std::size_t i = begin_index; i < (end_index); i++) {
+      for (std::size_t j = (i+1); j< (size_t)(n); j++) {
         int idx = (n*(n-1)/2) - (n-i)*(n-i-1)/2 - (i+1);
         
         ave_rages[idx + j] = (vec_tor[i] + vec_tor[j])/2;
-      }
-    }
-  }
+      }  // end for
+    }  // end for
+  }  // end operator
   
 };
 
@@ -316,20 +312,20 @@ struct pair_averages : public Worker
 //' # Create a vector of random returns
 //' re_turns <- rnorm(1e6)
 //' # Compare hle() with wilcox.test()
-//' all.equal(drop(HighFreq::hle(re_turns)), 
+//' all.equal(drop(NPE::hle(re_turns)), 
 //'   wilcox.test(re_turns, conf.int = TRUE))
 //' # Compare the speed of RcppParallel with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=HighFreq::hle(re_turns),
+//'   rcpp=NPE::hle(re_turns),
 //'   rcode=wilcox.test(re_turns, conf.int = TRUE),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-double hle(NumericVector vec_tor)
-{
+double hle(NumericVector vec_tor) {
+  
   int n = vec_tor.size();
   arma::vec pairs(n*(n-1)/2);
   
@@ -338,35 +334,37 @@ double hle(NumericVector vec_tor)
   parallelFor(0, vec_tor.length()-1, avera_ges);
 
   return med_ian(pairs);
-}
+}  // end hle
 
 
 
 
 
-//Function to calculate slopesof the all pairs for Theil-Sen Estimator.
+// Function to calculate slopes of the all pairs for Theil-Sen Estimator.
 
-NumericVector outer_pos( arma::vec vector_x, arma::vec vector_y ){
+NumericVector outer_pos(arma::vec vector_x, arma::vec vector_y) {
   NumericVector output;
   int n = vector_x.size();
   double temp;
-  for(int i = 0; i < n; i++){
-    for(int j = 0; j < n; j++){
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
       temp = vector_x[j] - vector_x[i];
-      if(temp > 0){
-        output.push_back(( vector_y[j] - vector_y[i]) / temp);
-      }
-    }
-  } 
+      if (temp > 0) {
+        output.push_back((vector_y[j] - vector_y[i]) / temp);
+      }  // end if
+    }  // end for
+  }  // end for
   return output;
-}
+}  // end outer_pos
 
-//Ranks vector_y according to sorted vector_X.
-NumericVector ts_proc( arma::vec vector_x, arma::vec vector_y ){
-  arma::uvec ind = arma::sort_index( vector_x );
+
+// Ranks vector_y according to sorted vector_X.
+NumericVector ts_proc(arma::vec vector_x, arma::vec vector_y) {
+  arma::uvec ind = arma::sort_index(vector_x);
   
-  return outer_pos( vector_x.elem( ind ), vector_y.elem( ind ) );
-}
+  return outer_pos(vector_x.elem(ind), vector_y.elem(ind));
+  
+}  // end ts_proc
 
 
 
@@ -394,23 +392,22 @@ NumericVector ts_proc( arma::vec vector_x, arma::vec vector_y ){
 //' # Compare the speed of RcppParallel with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=HighFreq::TheilSenEstimator(vector_x, vector_y),
+//'   rcpp=NPE::TheilSenEstimator(vector_x, vector_y),
 //'   rcode=WRS(vector_x, vector_y),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]  
-NumericVector TheilSenEstimator(arma::vec x, arma::vec y)
-{
+NumericVector TheilSenEstimator(arma::vec x, arma::vec y) {
   NumericVector coef(2);
-  NumericVector v1v2 = ts_proc( x, y );
+  NumericVector v1v2 = ts_proc(x, y);
   //int n_s = v1v2.size();	
-  coef[1] = med_ian( v1v2 );
+  coef[1] = med_ian(v1v2);
   
   coef[0] = med_ian(y - coef[1] * x);
   return coef;
-}
+}  // end TheilSenEstimator
 
 
 
@@ -433,12 +430,12 @@ NumericVector TheilSenEstimator(arma::vec x, arma::vec y)
 //' # Create a matrix of random returns
 //' re_turns <- matrix(rnorm(5e6), nc=5)
 //' # Compare calc_pca() with standard prcomp()
-//' all.equal(drop(HighFreq::calc_pca(re_turns)), 
+//' all.equal(drop(NPE::calc_pca(re_turns)), 
 //'   prcomp(re_turns))
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=HighFreq::calc_pca(re_turns),
+//'   rcpp=NPE::calc_pca(re_turns),
 //'   rcode=prcomp(re_turns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
@@ -446,5 +443,7 @@ NumericVector TheilSenEstimator(arma::vec x, arma::vec y)
 //' @export
 // [[Rcpp::export]]
 arma::mat calc_pca(arma::mat& mat_rix) {
+  
   return arma::princomp(mat_rix);
-}
+  
+}  // end calc_pca
