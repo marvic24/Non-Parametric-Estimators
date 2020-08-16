@@ -6,14 +6,8 @@
 Mann-Whitney U Test on \emph{vector} or a single-column \emph{time series}
 using \code{RcppArmadillo} and \code{boost}.}
 \usage{
-wilcoxanMannWhitneyTest(
-  x,
-  y,
-  mu = 0,
-  alternative = "two.sided",
-  exact = FALSE,
-  correct = TRUE
-)
+wilcoxanMannWhitneyTest(x, y, mu = 0, alternative = "two.sided",
+  exact = FALSE, correct = TRUE)
 }
 \arguments{
 \item{\code{x}}{A \emph{vector} or a single-column \emph{time series}.}

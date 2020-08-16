@@ -182,7 +182,7 @@ double medianAbsoluteDeviation(arma::vec& vec_tor) {
 //' Worker function for calculating median absolute deviation over rolling window
 //' by using parallel processing.
 
-// JP: Define structure 
+// Define structure 
 struct parallel_rolling_mad : public Worker
 {
   // input vector 

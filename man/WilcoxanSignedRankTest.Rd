@@ -5,13 +5,8 @@
 \title{Performs one sample Wilcoxan ranked sum test on \emph{vector} or a single-column
 \emph{time series} using \code{RcppArmadillo} and \code{boost}.}
 \usage{
-wilcoxanSignedRankTest(
-  x,
-  mu = 0,
-  alternative = "two.sided",
-  exact = FALSE,
-  correct = TRUE
-)
+wilcoxanSignedRankTest(x, mu = 0, alternative = "two.sided",
+  exact = FALSE, correct = TRUE)
 }
 \arguments{
 \item{\code{x}}{A \emph{vector} or a single-column \emph{time series}.}
