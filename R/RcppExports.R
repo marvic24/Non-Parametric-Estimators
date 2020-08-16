@@ -232,6 +232,40 @@ calc_pca <- function(mat_rix) {
     .Call(`_NPE_calc_pca`, mat_rix)
 }
 
+#' Calculate the medcouple of a  \emph{vector} or a single-column \emph{time series}
+#' using \code{Rcpp}.
+#' 
+#' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
+#' @param \code{eps1} A \emph{double} Tolerance of the algorithm.
+#' @param \code{eps2} A \emph{couble} Tolerance of the algorithm..
+#' 
+#' 
+#' @return A single \emph{double} value representing medcouple of the vector.
+#'
+#' @details The function \code{med_couple()} calculates the medcouple of the \emph{vector},
+#'   using \code{Rcpp}. The function \code{med_couple()} is several times faster
+#'   than \code{mc()} in package \code{robustbase}.
+#'
+#' @examples
+#' \dontrun{
+#' # Create a vector of random returns
+#' re_turns <- rnorm(1e6)
+#' # Compare med_couple() with mc()
+#' all.equal(drop(NPE::med_couple(re_turns)), 
+#'   robustbase::mc(re_turns))
+#' # Compare the speed of NPE with Robustbase code
+#' library(microbenchmark)
+#' summary(microbenchmark(
+#'   rcpp=NPE::med_couple(re_turns),
+#'   robustbase=robustbase::mc(re_turns),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' }
+#' 
+#' @export
+med_couple <- function(x, eps1 = 1e-14, eps2 = 1e-15) {
+    .Call(`_NPE_med_couple`, x, eps1, eps2)
+}
+
 #'This is an overload of a function \code{calc_ranksWithTies()}, which returns ranks of
 #'the \emph{vector} or a single column \emph{time-series}. It also returns a \code{boolean}
 #'variable indicating if there are ties in the data or not.

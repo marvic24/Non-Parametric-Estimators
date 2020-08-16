@@ -10,8 +10,20 @@ Description: Functions for calculating a variety of nonparametric estimators, in
 	It also implements the nonparametric statistics of the Wilcoxon Signed Rank test, the Mann-Whitney-Wilcoxon
 	Rank Sum test, and the Kruskal-Wallis test. It also implements PCA.
 License: MPL-2.0
-Imports: Rcpp (>= 1.0.4.6), RcppParallel
-LinkingTo: Rcpp, RcppArmadillo, RcppParallel, BH
+Imports: Rcpp (>= 1.0.4.6), 
+		 RcppParallel
+LinkingTo: Rcpp, 
+           RcppArmadillo, 
+		   RcppParallel, 
+		   BH
+Suggests: 
+    knitr,
+    rmarkdown	
+VignetteBuilder: knitr
+LazyData: true
+ByteCompile: true
+Repository: GitHub
+URL: https://github.com/marvic24/Non-Parametric-Estimators	
 SystemRequirements: GNU make
 RoxygenNote: 7.1.0
 Encoding: UTF-8

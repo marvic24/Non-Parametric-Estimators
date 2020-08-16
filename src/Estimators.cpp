@@ -1,5 +1,6 @@
 #define STRICT_R_HEADERS
 #include <algorithm>
+#include <vector>
 
 // [[Rcpp::depends(RcppParallel)]]
 #include <RcppParallel.h>
@@ -9,7 +10,7 @@
 using namespace RcppParallel;
 using namespace Rcpp;
 using namespace arma;
-
+using namespace std;
 
 //////////////////////////////////////////
 // Functions for Non Parametric Estimators
@@ -442,3 +443,318 @@ arma::mat calc_pca(arma::mat& mat_rix) {
   return arma::princomp(mat_rix);
   
 }  // end calc_pca
+
+
+
+
+
+// Template Function to return sign of the datatype.
+template <typename T>
+int signum(T val) {
+  return (T(0) < val) - (val < T(0));
+}
+
+// Template Function fo calculate the sum of the elements
+template <typename Container, typename Out = typename Container::value_type>
+Out sum(const Container& C) {
+  return std::accumulate(C.begin(), C.end(), Out());
+}
+
+
+
+// This computes the weighted median of array A with corresponding weights W.
+
+double wmedian(const std::vector<double>& A, const std::vector<long>& W){
+  
+  typedef pair<double, long> aw_t;
+  
+  long n = A.size();
+  std::vector<aw_t> AW(n);
+  
+  for (long i = 0; i < n; i++)
+    AW[i] = make_pair(A[i], W[i]);
+  
+  long wtot = sum(W);
+  
+  long beg = 0;
+  long end = n - 1;
+  
+  while (true) {
+    long mid = (beg + end) / 2;
+    
+    std::nth_element(AW.begin(), AW.begin() + mid, AW.end(),
+                [](const aw_t& l, const aw_t& r) {return l.first > r.first; });
+    
+    double trial = AW[mid].first;
+    
+    long wleft = 0, wright = 0;
+    for (aw_t& aw : AW) {
+      double a;
+      long w;
+      
+      std::tie(a, w) = std::move(aw);
+      
+      if (a > trial)
+        wleft += w;
+      else
+        // This also includes a == trial, i.e. the "middle" weight.
+        wright += w;
+      
+    } // end for
+    
+    
+    if (2 * wleft > wtot)
+      end = mid;
+    else if (2 * wright < wtot)
+      beg = mid;
+    else
+      return trial;
+    
+  } // end while
+  
+  
+  return 0;
+  
+}
+
+// Dunction to calculate medcouple.
+// This code is refered from http://inversethought.com/hg/medcouple/file/default/jmedcouple.c%2B%2B.
+double medcouple(const NumericVector X, double eps1, double eps2)
+  
+{
+  
+  long n = X.size(), n2 = (n - 1) / 2;
+  
+  if (n < 3)
+    return 0;
+  
+  
+  NumericVector Z = clone(X);
+  std::sort(Z.begin(), Z.end(), std::greater<double>());
+  
+  
+  double Zmed;
+  if (n % 2 == 1)
+    Zmed = Z[n2];
+  else
+    Zmed = (Z[n2] + Z[n2 + 1]) / 2;
+  
+  
+  // Check if the median is at the edges up to relative epsilon
+  if (abs(Z[0] - Zmed) < eps1 * (eps1 + abs(Zmed)))
+    return -1.0;
+  
+  if (abs(Z[n - 1] - Zmed) < eps1 * (eps1 + abs(Zmed)))
+    return 1.0;
+  
+  
+  // Center Z wrt median, so that median(Z) = 0.
+  std::for_each(Z.begin(), Z.end(), [&](double& z) { z -= Zmed; });
+  
+  
+  // Scale inside [-0.5, 0.5], for greater numerical stability.
+  double Zden = 2 * std::max(Z[0], -Z[n - 1]);
+  
+  std::for_each(Z.begin(), Z.end(), [&](double& z) {z /= Zden; });
+  
+  Zmed /= Zden;
+  
+  double Zeps = eps1 * (eps1 + abs(Zmed));
+  
+  // These overlap on the entries that are tied with the median
+  std::vector<double> Zplus, Zminus;
+  
+  std::copy_if(Z.begin(), Z.end(), std::back_inserter(Zplus),
+          
+          [=](double z) {return z >= -Zeps; });
+  
+  std::copy_if(Z.begin(), Z.end(), std::back_inserter(Zminus),
+          
+          [=](double z) {return Zeps >= z; });
+  
+  
+  long n_plus = Zplus.size();
+  long n_minus = Zminus.size();
+  
+  
+  /*
+   
+   Kernel function h for the medcouple, closing over the values of
+   
+   Zplus and Zminus just defined above.
+   
+   
+   In case a and be are within epsilon of the median, the kernel
+   
+   is the signum of their position.
+   
+   */
+  
+  auto h_kern = [&](long i, long j) {
+    
+    double a = Zplus[i];
+    double b = Zminus[j];
+    
+    double h;
+    
+    if (abs(a - b) <= 2 * eps2)
+      h = signum(n_plus - 1 - i - j);
+    else
+      h = (a + b) / (a - b);
+    
+    return h;
+    
+  }; // end h_kern
+  
+  
+  // Init left and right borders
+  
+  std::vector<long> L(n_plus, 0);
+  std::vector<long> R(n_plus, n_minus - 1);
+  
+  long Ltot = 0;
+  long Rtot = n_minus * n_plus;
+  long medc_idx = Rtot / 2;
+  
+  // kth pair algorithm (Johnson & Mizoguchi)
+  while (Rtot - Ltot > n_plus) {
+    
+    // First, compute the median inside the given bounds
+    std::vector<double> A;
+    std::vector<long> W;
+    
+    for (long i = 0; i < n_plus; i++) {
+      if (L[i] <= R[i]) {
+        
+        A.push_back(h_kern(i, (L[i] + R[i]) / 2));
+        W.push_back(R[i] - L[i] + 1);
+        
+      } // end if
+      
+    } // end for
+    
+    double Am = wmedian(A, W);
+    double Am_eps = eps1 * (eps1 + abs(Am));
+    
+    // Compute new left and right boundaries, based on the weighted median
+    
+    std::vector<long> P(n_plus), Q(n_plus);
+    
+    {
+      long j = 0;
+      
+      for (long i = n_plus - 1; i >= 0; i--) {
+        
+        while (j < n_minus and h_kern(i, j) - Am > Am_eps)
+          j++;
+        
+        P[i] = j - 1;
+        
+      } // end for
+    } // end scope
+    
+    
+    {
+      long j = n_minus - 1;
+      for (long i = 0; i < n_plus; i++) {
+        
+        while (j >= 0 and h_kern(i, j) - Am < -Am_eps)
+          j--;
+        
+        Q[i] = j + 1;
+        
+      } // end for
+      
+    } // end scope
+    
+    
+    long sumP = sum(P) + n_plus;
+    long sumQ = sum(Q);
+    
+    if (medc_idx <= sumP - 1) {
+      R = P;
+      Rtot = sumP;
+      
+    } // end if
+    
+    else {
+      if (medc_idx > sumQ - 1) {
+        L = Q;
+        Ltot = sumQ;
+      } // end if
+      else
+        return Am;
+      
+    } // end else
+    
+  } // end while
+  
+  
+  // Didn't find the median, but now we have a very small search space
+  // to find it in, just between the left and right boundaries. This
+  // space is of size Rtot - Ltot which is <= n_plus
+  
+  std::vector<double> A;
+  
+  for (long i = 0; i < n_plus; i++) {
+    
+    for (long j = L[i]; j <= R[i]; j++)
+      
+      A.push_back(h_kern(i, j));
+    
+  } // end for
+  
+  std::nth_element(A.begin(), A.begin() + (medc_idx - Ltot), A.end(),
+              
+              [](double x, double y) {return x > y; });
+  
+  
+  
+  double Am = A[medc_idx - Ltot];
+  return Am;
+  
+} // end medcouple
+
+
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the medcouple of a  \emph{vector} or a single-column \emph{time series}
+//' using \code{Rcpp}.
+//' 
+//' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
+//' @param \code{eps1} A \emph{double} Tolerance of the algorithm.
+//' @param \code{eps2} A \emph{couble} Tolerance of the algorithm..
+//' 
+//' 
+//' @return A single \emph{double} value representing medcouple of the vector.
+//'
+//' @details The function \code{med_couple()} calculates the medcouple of the \emph{vector},
+//'   using \code{Rcpp}. The function \code{med_couple()} is several times faster
+//'   than \code{mc()} in package \code{robustbase}.
+//'
+//' @examples
+//' \dontrun{
+//' # Create a vector of random returns
+//' re_turns <- rnorm(1e6)
+//' # Compare med_couple() with mc()
+//' all.equal(drop(NPE::med_couple(re_turns)), 
+//'   robustbase::mc(re_turns))
+//' # Compare the speed of NPE with Robustbase code
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   rcpp=NPE::med_couple(re_turns),
+//'   robustbase=robustbase::mc(re_turns),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+double med_couple(NumericVector x, double eps1 = 1e-14, double eps2 = 1e-15){
+  
+  return medcouple(x, eps1, eps2);
+  
+}
+

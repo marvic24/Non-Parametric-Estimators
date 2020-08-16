@@ -86,6 +86,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// med_couple
+double med_couple(NumericVector x, double eps1, double eps2);
+RcppExport SEXP _NPE_med_couple(SEXP xSEXP, SEXP eps1SEXP, SEXP eps2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type eps1(eps1SEXP);
+    Rcpp::traits::input_parameter< double >::type eps2(eps2SEXP);
+    rcpp_result_gen = Rcpp::wrap(med_couple(x, eps1, eps2));
+    return rcpp_result_gen;
+END_RCPP
+}
 // calc_ranksWithTies
 arma::vec calc_ranksWithTies(NumericVector vec_tor);
 RcppExport SEXP _NPE_calc_ranksWithTies(SEXP vec_torSEXP) {
@@ -148,6 +161,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NPE_hle", (DL_FUNC) &_NPE_hle, 1},
     {"_NPE_theilSenEstimator", (DL_FUNC) &_NPE_theilSenEstimator, 2},
     {"_NPE_calc_pca", (DL_FUNC) &_NPE_calc_pca, 1},
+    {"_NPE_med_couple", (DL_FUNC) &_NPE_med_couple, 3},
     {"_NPE_calc_ranksWithTies", (DL_FUNC) &_NPE_calc_ranksWithTies, 1},
     {"_NPE_wilcoxanSignedRankTest", (DL_FUNC) &_NPE_wilcoxanSignedRankTest, 5},
     {"_NPE_wilcoxanMannWhitneyTest", (DL_FUNC) &_NPE_wilcoxanMannWhitneyTest, 6},
