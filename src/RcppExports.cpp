@@ -63,15 +63,15 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// TheilSenEstimator
-NumericVector TheilSenEstimator(arma::vec x, arma::vec y);
-RcppExport SEXP _NPE_TheilSenEstimator(SEXP xSEXP, SEXP ySEXP) {
+// theilSenEstimator
+NumericVector theilSenEstimator(arma::vec x, arma::vec y);
+RcppExport SEXP _NPE_theilSenEstimator(SEXP xSEXP, SEXP ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type x(xSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
-    rcpp_result_gen = Rcpp::wrap(TheilSenEstimator(x, y));
+    rcpp_result_gen = Rcpp::wrap(theilSenEstimator(x, y));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -97,9 +97,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// WilcoxanSignedRankTest
-double WilcoxanSignedRankTest(arma::vec& x, const double& mu, const std::string& alternative, bool exact, const bool correct);
-RcppExport SEXP _NPE_WilcoxanSignedRankTest(SEXP xSEXP, SEXP muSEXP, SEXP alternativeSEXP, SEXP exactSEXP, SEXP correctSEXP) {
+// wilcoxanSignedRankTest
+double wilcoxanSignedRankTest(arma::vec& x, const double& mu, const std::string& alternative, bool exact, const bool correct);
+RcppExport SEXP _NPE_wilcoxanSignedRankTest(SEXP xSEXP, SEXP muSEXP, SEXP alternativeSEXP, SEXP exactSEXP, SEXP correctSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -108,13 +108,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const std::string& >::type alternative(alternativeSEXP);
     Rcpp::traits::input_parameter< bool >::type exact(exactSEXP);
     Rcpp::traits::input_parameter< const bool >::type correct(correctSEXP);
-    rcpp_result_gen = Rcpp::wrap(WilcoxanSignedRankTest(x, mu, alternative, exact, correct));
+    rcpp_result_gen = Rcpp::wrap(wilcoxanSignedRankTest(x, mu, alternative, exact, correct));
     return rcpp_result_gen;
 END_RCPP
 }
-// WilcoxanMannWhitneyTest
-double WilcoxanMannWhitneyTest(arma::vec& x, const arma::vec& y, const double& mu, const std::string& alternative, bool exact, const bool correct);
-RcppExport SEXP _NPE_WilcoxanMannWhitneyTest(SEXP xSEXP, SEXP ySEXP, SEXP muSEXP, SEXP alternativeSEXP, SEXP exactSEXP, SEXP correctSEXP) {
+// wilcoxanMannWhitneyTest
+double wilcoxanMannWhitneyTest(arma::vec& x, const arma::vec& y, const double& mu, const std::string& alternative, bool exact, const bool correct);
+RcppExport SEXP _NPE_wilcoxanMannWhitneyTest(SEXP xSEXP, SEXP ySEXP, SEXP muSEXP, SEXP alternativeSEXP, SEXP exactSEXP, SEXP correctSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -124,18 +124,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const std::string& >::type alternative(alternativeSEXP);
     Rcpp::traits::input_parameter< bool >::type exact(exactSEXP);
     Rcpp::traits::input_parameter< const bool >::type correct(correctSEXP);
-    rcpp_result_gen = Rcpp::wrap(WilcoxanMannWhitneyTest(x, y, mu, alternative, exact, correct));
+    rcpp_result_gen = Rcpp::wrap(wilcoxanMannWhitneyTest(x, y, mu, alternative, exact, correct));
     return rcpp_result_gen;
 END_RCPP
 }
-// KruskalWalliceTest
-double KruskalWalliceTest(List x);
-RcppExport SEXP _NPE_KruskalWalliceTest(SEXP xSEXP) {
+// kruskalWalliceTest
+double kruskalWalliceTest(List x);
+RcppExport SEXP _NPE_kruskalWalliceTest(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< List >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(KruskalWalliceTest(x));
+    rcpp_result_gen = Rcpp::wrap(kruskalWalliceTest(x));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -146,12 +146,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NPE_medianAbsoluteDeviation", (DL_FUNC) &_NPE_medianAbsoluteDeviation, 1},
     {"_NPE_rolling_mad", (DL_FUNC) &_NPE_rolling_mad, 2},
     {"_NPE_hle", (DL_FUNC) &_NPE_hle, 1},
-    {"_NPE_TheilSenEstimator", (DL_FUNC) &_NPE_TheilSenEstimator, 2},
+    {"_NPE_theilSenEstimator", (DL_FUNC) &_NPE_theilSenEstimator, 2},
     {"_NPE_calc_pca", (DL_FUNC) &_NPE_calc_pca, 1},
     {"_NPE_calc_ranksWithTies", (DL_FUNC) &_NPE_calc_ranksWithTies, 1},
-    {"_NPE_WilcoxanSignedRankTest", (DL_FUNC) &_NPE_WilcoxanSignedRankTest, 5},
-    {"_NPE_WilcoxanMannWhitneyTest", (DL_FUNC) &_NPE_WilcoxanMannWhitneyTest, 6},
-    {"_NPE_KruskalWalliceTest", (DL_FUNC) &_NPE_KruskalWalliceTest, 1},
+    {"_NPE_wilcoxanSignedRankTest", (DL_FUNC) &_NPE_wilcoxanSignedRankTest, 5},
+    {"_NPE_wilcoxanMannWhitneyTest", (DL_FUNC) &_NPE_wilcoxanMannWhitneyTest, 6},
+    {"_NPE_kruskalWalliceTest", (DL_FUNC) &_NPE_kruskalWalliceTest, 1},
     {NULL, NULL, 0}
 };
 

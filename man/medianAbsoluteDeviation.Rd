@@ -28,12 +28,12 @@ The function \code{medianAbsoluteDeviation()} calculates the median of
 # Create a vector of random returns
 re_turns <- rnorm(1e6)
 # Compare medianAbsoluteDeviation() with mad()
-all.equal(drop(HighFreq::medianAbsoluteDeviation(re_turns)), 
+all.equal(drop(NPE::medianAbsoluteDeviation(re_turns)), 
   mad(re_turns))
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=HighFreq::medianAbsoluteDeviation(re_turns),
+  rcpp=NPE::medianAbsoluteDeviation(re_turns),
   rcode=mad(re_turns),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

@@ -30,11 +30,11 @@ The function \code{calc_ranks()} calculates the ranks of the
 # Create a vector of random data
 da_ta <- round(runif(7), 2)
 # Calculate the ranks of the elements in two ways
-all.equal(rank(da_ta), drop(HighFreq::calc_ranksWithTies(da_ta)))
+all.equal(rank(da_ta), drop(NPE::calc_ranksWithTies(da_ta)))
 # Create a time series of random data
 da_ta <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
 # Calculate the ranks of the elements in two ways
-all.equal(rank(coredata(da_ta)), drop(HighFreq::calc_ranksWithTies(da_ta)))
+all.equal(rank(coredata(da_ta)), drop(NPE::calc_ranksWithTies(da_ta)))
 # Compare the speed of this function with RcppArmadillo and R code
 da_ta <- runif(7)
 library(microbenchmark)

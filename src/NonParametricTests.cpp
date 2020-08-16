@@ -14,12 +14,12 @@ using namespace arma;
 enum alternatives{two_sided, greater, less};
 
 //Function returning enum values for corresponding string names of alternatives.
-alternatives hash_it(const std::string& alternative)
-{
+alternatives hash_it(const std::string& alternative){
+  
   if(alternative == "greater" || alternative == "g" ) return  alternatives::greater;
   else if(alternative == "less" || alternative == "l" ) return alternatives::less;
   else return alternatives::two_sided;
-}
+} // end hash_it
 
 
 //'This is an overload of a function \code{calc_ranksWithTies()}, which returns ranks of
@@ -27,8 +27,8 @@ alternatives hash_it(const std::string& alternative)
 //'variable indicating if there are ties in the data or not.
 //'There is a function for calculating ranks in rcpp::armadillo, but it doesn't handle ties!
 
-arma::vec calc_ranksWithTies(const arma::vec& vec_tor, bool &ties)
-{
+arma::vec calc_ranksWithTies(const arma::vec& vec_tor, bool &ties){
+  
   typedef std::pair<double, int> ai_t;
   
   int n = vec_tor.n_elem;
@@ -39,37 +39,30 @@ arma::vec calc_ranksWithTies(const arma::vec& vec_tor, bool &ties)
   
   boost::sort::parallel_stable_sort(AI.begin(), AI.end(), [](const ai_t& l, const ai_t& r) {return l.first < r.first; });
   
-  
   arma::vec rnk(n);
   double rank = 1;
   int i = 0;
   int temp = 1;
   
-  while (i < n)
-  {
+  while (i < n){
     int j = i;
-    
-    while ((j < n-1) && (AI[j].first == AI[j + 1].first))
-    {
+    while ((j < n-1) && (AI[j].first == AI[j + 1].first)){
       ties = true;
       j++;
-    }
-    
+    } // end while
     
     temp = j - i + 1;
-    
-    for (j = 0; j < temp; j++)
-    {
+    for (j = 0; j < temp; j++){
       int id = AI[i + j].second;
       rnk[id] = rank + (temp - 1) * 0.5;
-    }
+    } // end for
     
     rank += temp;
     i += temp;
-  }
+  } // end while
   
   return rnk;
-}
+} // end calc_ranksWithTies
 
 
 
@@ -95,11 +88,11 @@ arma::vec calc_ranksWithTies(const arma::vec& vec_tor, bool &ties)
 //' # Create a vector of random data
 //' da_ta <- round(runif(7), 2)
 //' # Calculate the ranks of the elements in two ways
-//' all.equal(rank(da_ta), drop(HighFreq::calc_ranksWithTies(da_ta)))
+//' all.equal(rank(da_ta), drop(NPE::calc_ranksWithTies(da_ta)))
 //' # Create a time series of random data
 //' da_ta <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
 //' # Calculate the ranks of the elements in two ways
-//' all.equal(rank(coredata(da_ta)), drop(HighFreq::calc_ranksWithTies(da_ta)))
+//' all.equal(rank(coredata(da_ta)), drop(NPE::calc_ranksWithTies(da_ta)))
 //' # Compare the speed of this function with RcppArmadillo and R code
 //' da_ta <- runif(7)
 //' library(microbenchmark)
@@ -112,11 +105,11 @@ arma::vec calc_ranksWithTies(const arma::vec& vec_tor, bool &ties)
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec calc_ranksWithTies(NumericVector vec_tor)
-{
+arma::vec calc_ranksWithTies(NumericVector vec_tor){
+  
   bool ties = false;
   return calc_ranksWithTies(vec_tor, ties);
-}
+} // end calc_ranksWithTies
 
 
 
@@ -125,13 +118,11 @@ arma::vec calc_ranksWithTies(NumericVector vec_tor)
 //'This function calculates the p values using normal approximation in case 
 //'1. exact calculation is not requested and sample size is greater than 50.
 //'2. There are ties in the data.
-double pnorm_approximation(double z, const double& sigma, const bool& correct, const std::string& alternative = "two.sided")
-{
+double pnorm_approximation(double z, const double& sigma, const bool& correct, const std::string& alternative = "two.sided"){
+  
   double correction = 0;
-  if(correct)
-  {
-    switch(hash_it(alternative))
-    {
+  if(correct){
+    switch(hash_it(alternative)){
     case alternatives::greater:{
       correction = 0.5;
       break;
@@ -144,14 +135,13 @@ double pnorm_approximation(double z, const double& sigma, const bool& correct, c
       correction = sign(z)*0.5;
       break;
     } 
-    }
-  }
+    } // end switch
+  } // end if
   
   z = (z-correction)/sigma;
   double p =0;
   
-  switch(hash_it(alternative))
-  {
+  switch(hash_it(alternative)){
   case alternatives::greater:{
     p = R::pnorm(z, 0, 1, FALSE, FALSE);
     break;
@@ -164,10 +154,10 @@ double pnorm_approximation(double z, const double& sigma, const bool& correct, c
     p = 2*(R::pnorm(z , 0, 1, TRUE, FALSE) <  R::pnorm(z, 0, 1, FALSE, FALSE) ?  R::pnorm(z, 0, 1, TRUE, FALSE) :  R::pnorm(z, 0, 1, FALSE, FALSE));
     break;
   }
-  }
+  } // end switch
   
   return p;
-}
+} // end pnorm_approximation
 
 
 
@@ -194,7 +184,7 @@ double pnorm_approximation(double z, const double& sigma, const bool& correct, c
 //'
 //' @return A \emph{double} indicating p-value of the test.
 //'
-//' @details The function \code{WilcoxanSignedRankTest()} carries out the wilcoxan signed 
+//' @details The function \code{wilcoxanSignedRankTest()} carries out the wilcoxan signed 
 //'   rank test on \emph{vec_tor} and returns the \emph{p-value} of the test.
 //'   By default (if \code{exact} is not specified), an exact p-value is computed if sample 
 //'   contains less than 50 finite values and there are no ties. Otherwise, a normal approximation
@@ -209,40 +199,34 @@ double pnorm_approximation(double z, const double& sigma, const bool& correct, c
 //' # Create a time series of random data
 //' da_ta <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
 //' # Calculate the ranks of the elements in two ways
-//' all.equal(wilcox.test(coredata(da_ta))$p.value, drop(HighFreq::WilcoxanSignedRankTest(da_ta)))
+//' all.equal(wilcox.test(coredata(da_ta))$p.value, drop(NPE::wilcoxanSignedRankTest(da_ta)))
 //' # Compare the speed of Rcpp and R code
 //' da_ta <- runif(10)
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=WilcoxanSignedRankTest(da_ta),
+//'   rcpp=wilcoxanSignedRankTest(da_ta),
 //'   rcode=wilcox.test(da_ta),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-double WilcoxanSignedRankTest(arma::vec& x, const double& mu =0, const std::string& alternative = "two.sided", bool exact = false, const bool correct = true)
-{
+double wilcoxanSignedRankTest(arma::vec& x, const double& mu =0, const std::string& alternative = "two.sided", bool exact = false, const bool correct = true){
+  
   x = x- mu;
   bool ties = false;
   arma::vec ranks = calc_ranksWithTies(abs(x), ties);
   
   int n = x.size();
-  
   if(n<50)
     exact = true;
   
-  //double statistic = 0;
   arma::uvec idx = find(ranks >0);
   double statistic = arma::accu(ranks.elem(idx));
   
-  
   double p = 0.0;
-  
-  if(exact && !ties)
-  {
-    switch(hash_it(alternative))
-    {
+  if(exact && !ties){
+    switch(hash_it(alternative)){
     case alternatives::greater:{
       p = R::psignrank(statistic-1, n, FALSE, FALSE);
       break;
@@ -259,10 +243,9 @@ double WilcoxanSignedRankTest(arma::vec& x, const double& mu =0, const std::stri
       p = 2*p < 1.0 ? 2*p:1.0;
       break;
     }
-    }
-  }
-  else
-  {
+    } // end switch
+  } // end if
+  else{
     std::map<double, int> ties_table;
     for(double i:ranks)
       ties_table[i]++;
@@ -277,9 +260,9 @@ double WilcoxanSignedRankTest(arma::vec& x, const double& mu =0, const std::stri
     
     p = pnorm_approximation(z, sigma, correct, alternative);
     
-  }
+  } // end else
   return p;
-}
+} // end wilcoxanSignedRankTest
 
 
 
@@ -308,7 +291,7 @@ double WilcoxanSignedRankTest(arma::vec& x, const double& mu =0, const std::stri
 //'
 //' @return A \emph{double} indicating p-value of the test.
 //'
-//' @details The function \code{WilcoxanMannWhitneyTest()} carries out the wilcoxan-Mann-Whitney
+//' @details The function \code{wilcoxanMannWhitneyTest()} carries out the wilcoxan-Mann-Whitney
 //'   signed rank test on \emph{x} & \emph{y} and returns the \emph{p-value} of the test.
 //'   By default (if \code{exact} is not specified), an exact p-value is computed if sample 
 //'   contains less than 50 finite values and there are no ties. Otherwise, a normal approximation
@@ -320,21 +303,20 @@ double WilcoxanSignedRankTest(arma::vec& x, const double& mu =0, const std::stri
 //' x <- round(runif(10), 2)
 //' y <- round(runif(10), 2)
 //' # Carry out WMW signed rank test on the elements in two ways
-//' all.equal(wilcox.test(x, y)$p.value, drop(HighFreq::WilcoxanMannWhitneyTest(x, y)))
+//' all.equal(wilcox.test(x, y)$p.value, drop(NPE::wilcoxanMannWhitneyTest(x, y)))
 //' # Compare the speed of Rcpp and R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=WilcoxanMannWhitneyTest(x, y),
+//'   rcpp=wilcoxanMannWhitneyTest(x, y),
 //'   rcode=wilcox.test(x, y),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-double WilcoxanMannWhitneyTest(arma::vec& x, const arma::vec& y, const double& mu =0, const std::string& alternative = "two.sided", bool exact = false, const bool correct = true)
-{
-  x = x-mu;
+double wilcoxanMannWhitneyTest(arma::vec& x, const arma::vec& y, const double& mu =0, const std::string& alternative = "two.sided", bool exact = false, const bool correct = true){
   
+  x = x-mu;
   arma::vec xy = join_cols(x, y);
   
   bool ties = false;
@@ -348,9 +330,7 @@ double WilcoxanMannWhitneyTest(arma::vec& x, const arma::vec& y, const double& m
   
   std::map<double, double> table;
   for(int i=0; i<n_xy; i++)
-  {
     table[xy[i]] = ranks[i];
-  }
   
   arma::vec x_ranks(n_x);
   for(int i =0; i<n_x; i++)
@@ -359,10 +339,8 @@ double WilcoxanMannWhitneyTest(arma::vec& x, const arma::vec& y, const double& m
   double statistic = arma::accu(x_ranks) - n_x*(n_x+1)/2;
   double p = 0;
   
-  if(exact && !ties)
-  {
-    switch(hash_it(alternative))
-    {
+  if(exact && !ties){
+    switch(hash_it(alternative)){
     case alternatives::greater:{
       p = R::pwilcox(statistic-1, n_x, n_y, FALSE, FALSE);
       break;
@@ -379,11 +357,10 @@ double WilcoxanMannWhitneyTest(arma::vec& x, const arma::vec& y, const double& m
       p = 2*p < 1.0 ? 2*p:1.0;
       break;
     }
-    }
-  }
+    } // end switch
+  } // end if
   
-  else
-  {
+  else{
     std::map<double, int> ties_table;
     for(double i:ranks)
       ties_table[i]++;
@@ -398,10 +375,10 @@ double WilcoxanMannWhitneyTest(arma::vec& x, const arma::vec& y, const double& m
     
     p = pnorm_approximation(z, sigma, correct, alternative);
     
-  }
+  } // end else
   
   return p;
-}
+} // end wilcoxanMannWhitneyTest
 
 
 
@@ -414,7 +391,7 @@ double WilcoxanMannWhitneyTest(arma::vec& x, const arma::vec& y, const double& m
 //' 
 //' @return A \emph{double} indicating p-value of the test.
 //'
-//' @details The function \code{KruskalWalliceTest()} performs a Kruskal-Wallis rank 
+//' @details The function \code{kruskalWalliceTest()} performs a Kruskal-Wallis rank 
 //'   sum test of the null hypothesis that the location parameters of the distribution
 //'   of x are the same in each group. The alternative is that they differ in
 //'   at least in one.
@@ -426,29 +403,28 @@ double WilcoxanMannWhitneyTest(arma::vec& x, const arma::vec& y, const double& m
 //' z <- c(2.8, 3.4, 3.7, 2.2, 2.0) # with asbestosis
 //'
 //' # Carry out Kruskal wallice rank sum test on the elements in two ways
-//' all.equal(kruskal.test(list(x, y, z))$p.value, drop(HighFreq::KruskalWalliceTest(list(x, y, z))))
+//' all.equal(kruskal.test(list(x, y, z))$p.value, drop(NPE::kruskalWalliceTest(list(x, y, z))))
 //' # Compare the speed of Rcpp and R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=KruskalWalliceTest(list(x, y, z)),
+//'   rcpp=kruskalWalliceTest(list(x, y, z)),
 //'   rcode=kruskal.test(list(x, y, z))$p.value,
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-double KruskalWalliceTest(List x)
-{
+double kruskalWalliceTest(List x){
+  
   int n = x.size();
   arma::vec elements;
   arma::vec sizes(n);
   
-  for(int i=0; i<n; ++i)
-  {
+  for(int i=0; i<n; ++i){
     arma::vec temp = as<arma::vec>(x[i]);
     elements = join_cols(elements, temp);
     sizes[i] = temp.n_elem;
-  }
+  }// end for
   
   int n_e = elements.n_elem;
   
@@ -458,19 +434,17 @@ double KruskalWalliceTest(List x)
   int k=0;
   double statistic = 0;
   
-  for(int i=0; i<n; i++)
-  {
+  for(int i=0; i<n; i++){
     int m = sizes[i];
     double rank_sum = 0;
-    for(int j=0; j<m; j++)
-    {
+    for(int j=0; j<m; j++){
       rank_sum += ranks[j+k];
       k++;
-    }
+    } // end for
     
     statistic += (rank_sum*rank_sum)/m;
     
-  }
+  } // end for
   
   std::map<double, int> ties_table;
   for(double i:ranks)
@@ -488,6 +462,6 @@ double KruskalWalliceTest(List x)
   double p = R::pchisq(statistic, paramter, false, false); 
   
   return p; 
-}
+} // end kruskalWalliceTest
 
 

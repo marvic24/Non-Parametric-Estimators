@@ -32,12 +32,12 @@ The function \code{rolling_median()} calculates a vector of
 # Create a vector of random returns
 re_turns <- rnorm(1e6)
 # Compare rolling_median() with roll::roll_median()
-all.equal(drop(HighFreq::rolling_median(re_turns)), 
-  roll::roll_median(re_turns))
+all.equal(drop(NPE::rolling_median(re_turns, look_back=11)), 
+  roll::roll_median(re_turns, width=11))
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  parallel_rcpp=HighFreq::rolling_median(re_turns),
+  parallel_rcpp=NPE::rolling_median(re_turns),
   rcpp=roll::roll_median(re_turns),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

@@ -27,12 +27,12 @@ The function \code{calc_pca()} performs a principle component analysis
 # Create a matrix of random returns
 re_turns <- matrix(rnorm(5e6), nc=5)
 # Compare calc_pca() with standard prcomp()
-all.equal(drop(HighFreq::calc_pca(re_turns)), 
+all.equal(drop(NPE::calc_pca(re_turns)), 
   prcomp(re_turns))
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=HighFreq::calc_pca(re_turns),
+  rcpp=NPE::calc_pca(re_turns),
   rcode=prcomp(re_turns),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

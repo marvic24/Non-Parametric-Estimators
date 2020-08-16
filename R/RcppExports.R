@@ -28,12 +28,12 @@ NULL
 #' # Create a vector of random returns
 #' re_turns <- rnorm(1e6)
 #' # Compare med_ian() with median()
-#' all.equal(drop(HighFreq::med_ian(re_turns)), 
+#' all.equal(drop(NPE::med_ian(re_turns)), 
 #'   median(re_turns))
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=HighFreq::med_ian(re_turns),
+#'   rcpp=NPE::med_ian(re_turns),
 #'   rcode=median(re_turns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
@@ -63,12 +63,12 @@ med_ian <- function(vec_tor) {
 #' # Create a vector of random returns
 #' re_turns <- rnorm(1e6)
 #' # Compare rolling_median() with roll::roll_median()
-#' all.equal(drop(HighFreq::rolling_median(re_turns)), 
-#'   roll::roll_median(re_turns))
+#' all.equal(drop(NPE::rolling_median(re_turns, look_back=11)), 
+#'   roll::roll_median(re_turns, width=11))
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   parallel_rcpp=HighFreq::rolling_median(re_turns),
+#'   parallel_rcpp=NPE::rolling_median(re_turns),
 #'   rcpp=roll::roll_median(re_turns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
@@ -95,12 +95,12 @@ rolling_median <- function(vec_tor, look_back) {
 #' # Create a vector of random returns
 #' re_turns <- rnorm(1e6)
 #' # Compare medianAbsoluteDeviation() with mad()
-#' all.equal(drop(HighFreq::medianAbsoluteDeviation(re_turns)), 
+#' all.equal(drop(NPE::medianAbsoluteDeviation(re_turns)), 
 #'   mad(re_turns))
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=HighFreq::medianAbsoluteDeviation(re_turns),
+#'   rcpp=NPE::medianAbsoluteDeviation(re_turns),
 #'   rcode=mad(re_turns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
@@ -155,12 +155,12 @@ rolling_mad <- function(vec_tor, look_back) {
 #' # Create a vector of random returns
 #' re_turns <- rnorm(1e6)
 #' # Compare hle() with wilcox.test()
-#' all.equal(drop(HighFreq::hle(re_turns)), 
+#' all.equal(drop(NPE::hle(re_turns)), 
 #'   wilcox.test(re_turns, conf.int = TRUE))
 #' # Compare the speed of RcppParallel with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=HighFreq::hle(re_turns),
+#'   rcpp=NPE::hle(re_turns),
 #'   rcode=wilcox.test(re_turns, conf.int = TRUE),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
@@ -178,8 +178,8 @@ hle <- function(vec_tor) {
 #' 
 #' @return A column \emph{vector} containing two values i.e intercept and slope
 #'
-#' @details The function \code{TheilSenEstimator()} calculates the Theil-Sen estimator of 
-#'   the \emph{vector}, using \code{RcppArmadillo} . The function \code{TheilSenEstimator()}
+#' @details The function \code{theilSenEstimator()} calculates the Theil-Sen estimator of 
+#'   the \emph{vector}, using \code{RcppArmadillo} . The function \code{theilSenEstimator()}
 #'   is significantly faster than function \code{WRS::tsreg()} in \code{R}.
 #'
 #' @examples
@@ -187,18 +187,18 @@ hle <- function(vec_tor) {
 #' # Create a vector of random returns
 #' vector_x <- rnorm(10)
 #' vactor_y <- rnorm(10)
-#' # Compare TheilSenEstimator() with tsreg()
+#' # Compare theilSenEstimator() with tsreg()
 #' # Compare the speed of RcppParallel with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=HighFreq::TheilSenEstimator(vector_x, vector_y),
+#'   rcpp=NPE::theilSenEstimator(vector_x, vector_y),
 #'   rcode=WRS(vector_x, vector_y),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
-TheilSenEstimator <- function(x, y) {
-    .Call(`_NPE_TheilSenEstimator`, x, y)
+theilSenEstimator <- function(x, y) {
+    .Call(`_NPE_theilSenEstimator`, x, y)
 }
 
 #' Performs a principle component analysis on given \emph{matrix} or \emph{time
@@ -217,12 +217,12 @@ TheilSenEstimator <- function(x, y) {
 #' # Create a matrix of random returns
 #' re_turns <- matrix(rnorm(5e6), nc=5)
 #' # Compare calc_pca() with standard prcomp()
-#' all.equal(drop(HighFreq::calc_pca(re_turns)), 
+#' all.equal(drop(NPE::calc_pca(re_turns)), 
 #'   prcomp(re_turns))
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=HighFreq::calc_pca(re_turns),
+#'   rcpp=NPE::calc_pca(re_turns),
 #'   rcode=prcomp(re_turns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
@@ -262,11 +262,11 @@ NULL
 #' # Create a vector of random data
 #' da_ta <- round(runif(7), 2)
 #' # Calculate the ranks of the elements in two ways
-#' all.equal(rank(da_ta), drop(HighFreq::calc_ranksWithTies(da_ta)))
+#' all.equal(rank(da_ta), drop(NPE::calc_ranksWithTies(da_ta)))
 #' # Create a time series of random data
 #' da_ta <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
 #' # Calculate the ranks of the elements in two ways
-#' all.equal(rank(coredata(da_ta)), drop(HighFreq::calc_ranksWithTies(da_ta)))
+#' all.equal(rank(coredata(da_ta)), drop(NPE::calc_ranksWithTies(da_ta)))
 #' # Compare the speed of this function with RcppArmadillo and R code
 #' da_ta <- runif(7)
 #' library(microbenchmark)
@@ -302,7 +302,7 @@ calc_ranksWithTies <- function(vec_tor) {
 #'
 #' @return A \emph{double} indicating p-value of the test.
 #'
-#' @details The function \code{WilcoxanSignedRankTest()} carries out the wilcoxan signed 
+#' @details The function \code{wilcoxanSignedRankTest()} carries out the wilcoxan signed 
 #'   rank test on \emph{vec_tor} and returns the \emph{p-value} of the test.
 #'   By default (if \code{exact} is not specified), an exact p-value is computed if sample 
 #'   contains less than 50 finite values and there are no ties. Otherwise, a normal approximation
@@ -317,19 +317,19 @@ calc_ranksWithTies <- function(vec_tor) {
 #' # Create a time series of random data
 #' da_ta <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
 #' # Calculate the ranks of the elements in two ways
-#' all.equal(wilcox.test(coredata(da_ta))$p.value, drop(HighFreq::WilcoxanSignedRankTest(da_ta)))
+#' all.equal(wilcox.test(coredata(da_ta))$p.value, drop(NPE::wilcoxanSignedRankTest(da_ta)))
 #' # Compare the speed of Rcpp and R code
 #' da_ta <- runif(10)
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=WilcoxanSignedRankTest(da_ta),
+#'   rcpp=wilcoxanSignedRankTest(da_ta),
 #'   rcode=wilcox.test(da_ta),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
-WilcoxanSignedRankTest <- function(x, mu = 0, alternative = "two.sided", exact = FALSE, correct = TRUE) {
-    .Call(`_NPE_WilcoxanSignedRankTest`, x, mu, alternative, exact, correct)
+wilcoxanSignedRankTest <- function(x, mu = 0, alternative = "two.sided", exact = FALSE, correct = TRUE) {
+    .Call(`_NPE_wilcoxanSignedRankTest`, x, mu, alternative, exact, correct)
 }
 
 #' Performs two sample Wilcoxan-Mann-Whitney rank sum test also known as 
@@ -354,7 +354,7 @@ WilcoxanSignedRankTest <- function(x, mu = 0, alternative = "two.sided", exact =
 #'
 #' @return A \emph{double} indicating p-value of the test.
 #'
-#' @details The function \code{WilcoxanMannWhitneyTest()} carries out the wilcoxan-Mann-Whitney
+#' @details The function \code{wilcoxanMannWhitneyTest()} carries out the wilcoxan-Mann-Whitney
 #'   signed rank test on \emph{x} & \emph{y} and returns the \emph{p-value} of the test.
 #'   By default (if \code{exact} is not specified), an exact p-value is computed if sample 
 #'   contains less than 50 finite values and there are no ties. Otherwise, a normal approximation
@@ -366,18 +366,18 @@ WilcoxanSignedRankTest <- function(x, mu = 0, alternative = "two.sided", exact =
 #' x <- round(runif(10), 2)
 #' y <- round(runif(10), 2)
 #' # Carry out WMW signed rank test on the elements in two ways
-#' all.equal(wilcox.test(x, y)$p.value, drop(HighFreq::WilcoxanMannWhitneyTest(x, y)))
+#' all.equal(wilcox.test(x, y)$p.value, drop(NPE::wilcoxanMannWhitneyTest(x, y)))
 #' # Compare the speed of Rcpp and R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=WilcoxanMannWhitneyTest(x, y),
+#'   rcpp=wilcoxanMannWhitneyTest(x, y),
 #'   rcode=wilcox.test(x, y),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
-WilcoxanMannWhitneyTest <- function(x, y, mu = 0, alternative = "two.sided", exact = FALSE, correct = TRUE) {
-    .Call(`_NPE_WilcoxanMannWhitneyTest`, x, y, mu, alternative, exact, correct)
+wilcoxanMannWhitneyTest <- function(x, y, mu = 0, alternative = "two.sided", exact = FALSE, correct = TRUE) {
+    .Call(`_NPE_wilcoxanMannWhitneyTest`, x, y, mu, alternative, exact, correct)
 }
 
 #' Performs a Kruskal-Wallis rank sum test. using \code{Rcpp} and \code{boost}.
@@ -386,7 +386,7 @@ WilcoxanMannWhitneyTest <- function(x, y, mu = 0, alternative = "two.sided", exa
 #' 
 #' @return A \emph{double} indicating p-value of the test.
 #'
-#' @details The function \code{KruskalWalliceTest()} performs a Kruskal-Wallis rank 
+#' @details The function \code{kruskalWalliceTest()} performs a Kruskal-Wallis rank 
 #'   sum test of the null hypothesis that the location parameters of the distribution
 #'   of x are the same in each group. The alternative is that they differ in
 #'   at least in one.
@@ -398,17 +398,17 @@ WilcoxanMannWhitneyTest <- function(x, y, mu = 0, alternative = "two.sided", exa
 #' z <- c(2.8, 3.4, 3.7, 2.2, 2.0) # with asbestosis
 #'
 #' # Carry out Kruskal wallice rank sum test on the elements in two ways
-#' all.equal(kruskal.test(list(x, y, z))$p.value, drop(HighFreq::KruskalWalliceTest(list(x, y, z))))
+#' all.equal(kruskal.test(list(x, y, z))$p.value, drop(NPE::kruskalWalliceTest(list(x, y, z))))
 #' # Compare the speed of Rcpp and R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=KruskalWalliceTest(list(x, y, z)),
+#'   rcpp=kruskalWalliceTest(list(x, y, z)),
 #'   rcode=kruskal.test(list(x, y, z))$p.value,
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
-KruskalWalliceTest <- function(x) {
-    .Call(`_NPE_KruskalWalliceTest`, x)
+kruskalWalliceTest <- function(x) {
+    .Call(`_NPE_kruskalWalliceTest`, x)
 }
 

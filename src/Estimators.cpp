@@ -340,9 +340,12 @@ double hle(NumericVector vec_tor) {
 
 
 
-// Function to calculate slopes of the all pairs for Theil-Sen Estimator.
 
-NumericVector outer_pos(arma::vec vector_x, arma::vec vector_y) {
+
+
+// Function to calculate slopes of the all pairs for Theil-Sen Estimator.
+NumericVector ts_proc(arma::vec vector_x, arma::vec vector_y) {
+
   NumericVector output;
   int n = vector_x.size();
   double temp;
@@ -355,14 +358,6 @@ NumericVector outer_pos(arma::vec vector_x, arma::vec vector_y) {
     }  // end for
   }  // end for
   return output;
-}  // end outer_pos
-
-
-// Ranks vector_y according to sorted vector_X.
-NumericVector ts_proc(arma::vec vector_x, arma::vec vector_y) {
-  arma::uvec ind = arma::sort_index(vector_x);
-  
-  return outer_pos(vector_x.elem(ind), vector_y.elem(ind));
   
 }  // end ts_proc
 
@@ -379,8 +374,8 @@ NumericVector ts_proc(arma::vec vector_x, arma::vec vector_y) {
 //' 
 //' @return A column \emph{vector} containing two values i.e intercept and slope
 //'
-//' @details The function \code{TheilSenEstimator()} calculates the Theil-Sen estimator of 
-//'   the \emph{vector}, using \code{RcppArmadillo} . The function \code{TheilSenEstimator()}
+//' @details The function \code{theilSenEstimator()} calculates the Theil-Sen estimator of 
+//'   the \emph{vector}, using \code{RcppArmadillo} . The function \code{theilSenEstimator()}
 //'   is significantly faster than function \code{WRS::tsreg()} in \code{R}.
 //'
 //' @examples
@@ -388,18 +383,18 @@ NumericVector ts_proc(arma::vec vector_x, arma::vec vector_y) {
 //' # Create a vector of random returns
 //' vector_x <- rnorm(10)
 //' vactor_y <- rnorm(10)
-//' # Compare TheilSenEstimator() with tsreg()
+//' # Compare theilSenEstimator() with tsreg()
 //' # Compare the speed of RcppParallel with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=NPE::TheilSenEstimator(vector_x, vector_y),
+//'   rcpp=NPE::theilSenEstimator(vector_x, vector_y),
 //'   rcode=WRS(vector_x, vector_y),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]  
-NumericVector TheilSenEstimator(arma::vec x, arma::vec y) {
+NumericVector theilSenEstimator(arma::vec x, arma::vec y) {
   NumericVector coef(2);
   NumericVector v1v2 = ts_proc(x, y);
   //int n_s = v1v2.size();	
@@ -407,7 +402,7 @@ NumericVector TheilSenEstimator(arma::vec x, arma::vec y) {
   
   coef[0] = med_ian(y - coef[1] * x);
   return coef;
-}  // end TheilSenEstimator
+}  // end theilSenEstimator
 
 
 

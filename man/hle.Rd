@@ -31,12 +31,12 @@ The function \code{hle()} calculates the Hodges-Lehmann estimator of
 # Create a vector of random returns
 re_turns <- rnorm(1e6)
 # Compare hle() with wilcox.test()
-all.equal(drop(HighFreq::hle(re_turns)), 
+all.equal(drop(NPE::hle(re_turns)), 
   wilcox.test(re_turns, conf.int = TRUE))
 # Compare the speed of RcppParallel with R code
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=HighFreq::hle(re_turns),
+  rcpp=NPE::hle(re_turns),
   rcode=wilcox.test(re_turns, conf.int = TRUE),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

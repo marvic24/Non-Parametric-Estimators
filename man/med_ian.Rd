@@ -27,12 +27,12 @@ The function \code{med_ian()} calculates the median of the \emph{vector},
 # Create a vector of random returns
 re_turns <- rnorm(1e6)
 # Compare med_ian() with median()
-all.equal(drop(HighFreq::med_ian(re_turns)), 
+all.equal(drop(NPE::med_ian(re_turns)), 
   median(re_turns))
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=HighFreq::med_ian(re_turns),
+  rcpp=NPE::med_ian(re_turns),
   rcode=median(re_turns),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
