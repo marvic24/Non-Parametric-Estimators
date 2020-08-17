@@ -46,10 +46,11 @@ using namespace std;
 //' 
 //' @export
 // [[Rcpp::export]]
-double med_ian(const arma::vec& vec_tor)
-{
+double med_ian(const arma::vec& vec_tor) {
+  
   return arma::median(vec_tor);
-}
+  
+}  // end med_ian
 
 
 
@@ -242,8 +243,7 @@ struct parallel_rolling_mad : public Worker
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec rolling_mad(NumericVector vec_tor, int look_back)
-{
+arma::vec rolling_mad(NumericVector vec_tor, int look_back) {
   int n = vec_tor.size();
   arma::vec results(n);
   
@@ -275,7 +275,7 @@ struct pair_averages : public Worker
   // Constructor
   pair_averages(const NumericVector vec_tor, arma::vec& ave_rages) : vec_tor(vec_tor), ave_rages(ave_rages){ n = vec_tor.size();}
   
-  void operator()(std::size_t begin_index, std::size_t end_index){
+  void operator()(std::size_t begin_index, std::size_t end_index) {
 
     for (std::size_t i = begin_index; i < (end_index); i++) {
       for (std::size_t j = (i+1); j< (size_t)(n); j++) {
@@ -335,6 +335,7 @@ double hle(NumericVector vec_tor) {
   parallelFor(0, vec_tor.length()-1, avera_ges);
 
   return med_ian(pairs);
+  
 }  // end hle
 
 
@@ -464,7 +465,7 @@ Out sum(const Container& C) {
 
 // This computes the weighted median of array A with corresponding weights W.
 
-double wmedian(const std::vector<double>& A, const std::vector<long>& W){
+double wmedian(const std::vector<double>& A, const std::vector<long>& W) {
   
   typedef pair<double, long> aw_t;
   
@@ -752,7 +753,7 @@ double medcouple(const NumericVector X, double eps1, double eps2)
 //' 
 //' @export
 // [[Rcpp::export]]
-double med_couple(NumericVector x, double eps1 = 1e-14, double eps2 = 1e-15){
+double med_couple(NumericVector x, double eps1 = 1e-14, double eps2 = 1e-15) {
   
   return medcouple(x, eps1, eps2);
   
