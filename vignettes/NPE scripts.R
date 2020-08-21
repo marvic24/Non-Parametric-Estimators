@@ -134,8 +134,8 @@ summary(microbenchmark(
 
 
 #############################################################################################
-#need to install BH to use boost libraries in this code.
-#install.packages("BH")
+# need to install BH to use boost libraries in this code.
+# install.packages("BH")
 
 # Non parametric tests
 Rcpp::sourceCpp(file = "E:\\Summer term\\project\\NonParametricTests.cpp")
