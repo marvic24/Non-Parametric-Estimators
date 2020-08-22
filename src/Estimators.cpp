@@ -72,6 +72,7 @@ struct parallel_rolling_median : public Worker
                           const int look_back,
                           arma::vec& med_ians) : vec_tor(vec_tor), look_back(look_back), med_ians(med_ians){}
   
+  //Parallel Function operator
   void operator()(std::size_t begin, std::size_t end) {
     
     for (std::size_t i = begin; i < end; i++) {
@@ -83,7 +84,7 @@ struct parallel_rolling_median : public Worker
       
       med_ians[i] = arma::median(temp);
     }  // end for
-  }  // end operator
+  }  // end Parallel Function operator
 };
 
 
@@ -193,11 +194,12 @@ struct parallel_rolling_mad : public Worker
   // Output (pass by reference)
   arma::vec& m_ad;
   
-  // Define constructor
+  // Constructor
   parallel_rolling_mad(const NumericVector vec_tor,
                           const int look_back,
                           arma::vec& m_ad) : vec_tor(vec_tor), look_back(look_back), m_ad(m_ad){}
   
+  // Parallel function operator
   void operator()(std::size_t begin, std::size_t end) {
     
     for (std::size_t i = begin; i < end; i++) {
@@ -211,7 +213,7 @@ struct parallel_rolling_mad : public Worker
       
       m_ad[i] = med_ian(arma::abs(temp - med_ian(temp)));
     }  // end for
-  }  // end operator
+  }  // end Parallel function operator
 };
 
 
@@ -275,6 +277,7 @@ struct pair_averages : public Worker
   // Constructor
   pair_averages(const NumericVector vec_tor, arma::vec& ave_rages) : vec_tor(vec_tor), ave_rages(ave_rages){ n = vec_tor.size();}
   
+  // Parallel Function Operator
   void operator()(std::size_t begin_index, std::size_t end_index){
 
     for (std::size_t i = begin_index; i < (end_index); i++) {
@@ -284,7 +287,7 @@ struct pair_averages : public Worker
         ave_rages[idx + j] = (vec_tor[i] + vec_tor[j])/2;
       }  // end for
     }  // end for
-  }  // end operator
+  }  // end Parallel Function operator
   
 };
 
@@ -398,9 +401,11 @@ NumericVector ts_proc(arma::vec vector_x, arma::vec vector_y) {
 NumericVector theilSenEstimator(arma::vec x, arma::vec y) {
   NumericVector coef(2);
   NumericVector v1v2 = ts_proc(x, y);
-  //int n_s = v1v2.size();	
+  
+  // Slope
   coef[1] = med_ian(v1v2);
   
+  // Intercept
   coef[0] = med_ian(y - coef[1] * x);
   return coef;
 }  // end theilSenEstimator
@@ -482,6 +487,7 @@ double wmedian(const std::vector<double>& A, const std::vector<long>& W){
   while (true) {
     long mid = (beg + end) / 2;
     
+    // Returns n'th largest element.
     std::nth_element(AW.begin(), AW.begin() + mid, AW.end(),
                 [](const aw_t& l, const aw_t& r) {return l.first > r.first; });
     
@@ -580,12 +586,10 @@ double medcouple(const NumericVector X, double eps1, double eps2)
   /*
    
    Kernel function h for the medcouple, closing over the values of
-   
    Zplus and Zminus just defined above.
    
    
    In case a and be are within epsilon of the median, the kernel
-   
    is the signum of their position.
    
    */
@@ -726,7 +730,7 @@ double medcouple(const NumericVector X, double eps1, double eps2)
 //' 
 //' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
 //' @param \code{eps1} A \emph{double} Tolerance of the algorithm.
-//' @param \code{eps2} A \emph{couble} Tolerance of the algorithm..
+//' @param \code{eps2} A \emph{double} Tolerance of the algorithm..
 //' 
 //' 
 //' @return A single \emph{double} value representing medcouple of the vector.

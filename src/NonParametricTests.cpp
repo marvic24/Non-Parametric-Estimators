@@ -37,6 +37,8 @@ arma::vec calc_ranksWithTies(const arma::vec& vec_tor, bool &ties){
   for (int i = 0; i < n; i++)
     AI[i] = std::make_pair(vec_tor[i], i);
   
+  // Boost library function for parallel sorting.
+  // In C++ 17 instead of this we can use -  std::sort(std::execution::par_unseq, vec.begin(), vec.end());
   boost::sort::parallel_stable_sort(AI.begin(), AI.end(), [](const ai_t& l, const ai_t& r) {return l.first < r.first; });
   
   arma::vec rnk(n);
@@ -246,6 +248,8 @@ double wilcoxanSignedRankTest(arma::vec& x, const double& mu =0, const std::stri
     } // end switch
   } // end if
   else{
+    
+    // Using Normal Approximation due to either ties or large vector.
     std::map<double, int> ties_table;
     for(double i:ranks)
       ties_table[i]++;
@@ -361,6 +365,7 @@ double wilcoxanMannWhitneyTest(arma::vec& x, const arma::vec& y, const double& m
   } // end if
   
   else{
+    // Using Normal Approximation due to either ties or large vector.
     std::map<double, int> ties_table;
     for(double i:ranks)
       ties_table[i]++;
