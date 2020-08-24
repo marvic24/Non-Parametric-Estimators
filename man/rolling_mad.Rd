@@ -2,8 +2,9 @@
 % Please edit documentation in R/RcppExports.R
 \name{rolling_mad}
 \alias{rolling_mad}
-\title{Calculate the rolling median absolute deviation over a \emph{vector} or
-a single-column \emph{time series} using \code{RcppArmadillo} and \code{RcppParallel}.}
+\title{Calculate the rolling median absolute deviation over a \emph{vector} or a
+single-column \emph{time series} using \code{RcppArmadillo} and
+\code{RcppParallel}.}
 \usage{
 rolling_mad(vec_tor, look_back)
 }
@@ -18,8 +19,9 @@ A column \emph{vector} of the same length as the argument
   \code{vect_tor}.
 }
 \description{
-Calculate the rolling median absolute deviation over a \emph{vector} or
-a single-column \emph{time series} using \code{RcppArmadillo} and \code{RcppParallel}.
+Calculate the rolling median absolute deviation over a \emph{vector} or a
+single-column \emph{time series} using \code{RcppArmadillo} and
+\code{RcppParallel}.
 }
 \details{
 The function \code{rolling_mad()} calculates a vector of

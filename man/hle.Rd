@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{hle}
 \alias{hle}
-\title{Calculate the non parametric Hodges-Lehmann estimator of location for a
+\title{Calculate the nonparametric Hodges-Lehmann estimator of location for a
 \emph{vector} or a single-column \emph{time series} using \code{RcppArmadillo}
 and \code{RcppParallel}.}
 \usage{
@@ -16,7 +16,7 @@ A single \emph{double} value representing Hodges-Lehmann estimator of
   the vector.
 }
 \description{
-Calculate the non parametric Hodges-Lehmann estimator of location for a
+Calculate the nonparametric Hodges-Lehmann estimator of location for a
 \emph{vector} or a single-column \emph{time series} using \code{RcppArmadillo}
 and \code{RcppParallel}.
 }

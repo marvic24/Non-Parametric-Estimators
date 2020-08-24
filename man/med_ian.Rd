@@ -2,8 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{med_ian}
 \alias{med_ian}
-\title{Calculate the median of a  \emph{vector} or a single-column \emph{time series}
-using \code{RcppArmadillo}.}
+\title{Calculate the median of a  \emph{vector} or a single-column \emph{time
+series} using \code{RcppArmadillo}.}
 \usage{
 med_ian(vec_tor)
 }
@@ -14,13 +14,13 @@ med_ian(vec_tor)
 A single \emph{double} value representing median of the vector.
 }
 \description{
-Calculate the median of a  \emph{vector} or a single-column \emph{time series}
-using \code{RcppArmadillo}.
+Calculate the median of a  \emph{vector} or a single-column \emph{time
+series} using \code{RcppArmadillo}.
 }
 \details{
-The function \code{med_ian()} calculates the median of the \emph{vector},
-  using \code{RcppArmadillo}. The function \code{med_ian()} is several times faster
-  than \code{median()} in \code{R}.
+The function \code{med_ian()} calculates the median of the
+  \emph{vector}, using \code{RcppArmadillo}. The function \code{med_ian()}
+  is several times faster than \code{median()} in \code{R}.
 }
 \examples{
 \dontrun{

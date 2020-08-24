@@ -8,20 +8,20 @@ NULL
 #' by using parallel processing.
 NULL
 
-#' Worker function for calculating pair averages needed for Hodges-Lehmann estimator
-#' by using parallel processing.
+#' Worker function for calculating pair averages needed for Hodges-Lehmann
+#' estimator by using parallel processing.
 NULL
 
-#' Calculate the median of a  \emph{vector} or a single-column \emph{time series}
-#' using \code{RcppArmadillo}.
-#' 
+#' Calculate the median of a  \emph{vector} or a single-column \emph{time
+#' series} using \code{RcppArmadillo}.
+#'
 #' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
-#' 
+#'
 #' @return A single \emph{double} value representing median of the vector.
 #'
-#' @details The function \code{med_ian()} calculates the median of the \emph{vector},
-#'   using \code{RcppArmadillo}. The function \code{med_ian()} is several times faster
-#'   than \code{median()} in \code{R}.
+#' @details The function \code{med_ian()} calculates the median of the
+#'   \emph{vector}, using \code{RcppArmadillo}. The function \code{med_ian()}
+#'   is several times faster than \code{median()} in \code{R}.
 #'
 #' @examples
 #' \dontrun{
@@ -78,40 +78,45 @@ rolling_median <- function(vec_tor, look_back) {
     .Call(`_NPE_rolling_median`, vec_tor, look_back)
 }
 
-#' Calculate the Median absolute deviation of a  \emph{vector} or a single-column
-#'  \emph{time series} using \code{RcppArmadillo}.
-#' 
-#' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
-#' 
-#' @return A single \emph{double} value representing median absolue deviation of 
-#'   the vector.
+#' Calculate the Median Absolute Deviations \emph{MAD} of the columns of a
+#' \emph{time series} or a \emph{matrix} using \code{RcppArmadillo}.
 #'
-#' @details The function \code{medianAbsoluteDeviation()} calculates the median of 
-#'   the \emph{vector}, using \code{RcppArmadillo}. The function \code{medianAbsoluteDeviation()}
-#'   is several times faster than \code{mad()} in \code{R}.
+#' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
+#'
+#' @return A row vector with the Median Absolute Deviations \emph{MAD} of
+#'   the columns of \code{t_series} matrix.
+#'
+#' @details The function \code{calc_mad()} calculates the Median Absolute
+#'   Deviations \emph{MAD} of the columns of a \emph{time series} or a
+#'   \emph{matrix} of data using \code{RcppArmadillo} \code{C++} code.
+#'
+#'   The function \code{calc_mad()} performs the same calculation as the
+#'   function \code{stats::mad()}, but it's much faster because it uses
+#'   \code{RcppArmadillo} \code{C++} code.
 #'
 #' @examples
 #' \dontrun{
-#' # Create a vector of random returns
-#' re_turns <- rnorm(1e6)
-#' # Compare medianAbsoluteDeviation() with mad()
-#' all.equal(drop(NPE::medianAbsoluteDeviation(re_turns)), 
-#'   mad(re_turns))
-#' # Compare the speed of RcppArmadillo with R code
+#' # Calculate VTI returns
+#' re_turns <- na.omit(rutils::etf_env$re_turns[ ,"VTI", drop=FALSE])
+#' # Compare calc_mad() with stats::mad()
+#' all.equal(drop(NPE::calc_mad(re_turns)), 
+#'   mad(re_turns)/1.4826)
+#' # Compare the speed of RcppArmadillo with stats::mad()
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=NPE::medianAbsoluteDeviation(re_turns),
-#'   rcode=mad(re_turns),
+#'   Rcpp=NPE::calc_mad(re_turns),
+#'   Rcode=mad(re_turns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
-medianAbsoluteDeviation <- function(vec_tor) {
-    .Call(`_NPE_medianAbsoluteDeviation`, vec_tor)
+calc_mad <- function(t_series) {
+    .Call(`_NPE_calc_mad`, t_series)
 }
 
-#' Calculate the rolling median absolute deviation over a \emph{vector} or
-#' a single-column \emph{time series} using \code{RcppArmadillo} and \code{RcppParallel}.
+#' Calculate the rolling median absolute deviation over a \emph{vector} or a
+#' single-column \emph{time series} using \code{RcppArmadillo} and
+#' \code{RcppParallel}.
 #' 
 #' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
 #' @param \code{look_back} The length of look back interval, equal to the
@@ -136,7 +141,89 @@ rolling_mad <- function(vec_tor, look_back) {
     .Call(`_NPE_rolling_mad`, vec_tor, look_back)
 }
 
-#' Calculate the non parametric Hodges-Lehmann estimator of location for a
+#' Calculate the skewness of the columns of a \emph{time series} or a
+#' \emph{matrix} using \code{RcppArmadillo}.
+#'
+#' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
+#'
+#' @param \code{typ_e} A \emph{string} specifying the objective for calculating
+#'   the weights (see Details). (The default is the \code{typ_e = "pearson"}.)
+#'
+#' @param \code{al_pha} The confidence level for calculating the quantiles.
+#'   (the default is \code{0.25}).
+#'
+#' @return A row vector equal to the skewness of the columns of
+#'   \code{t_series}.
+#'
+#' @details The function \code{calc_skew()} calculates the skewness of the
+#'   columns of a \emph{time series} or a \emph{matrix} of data using
+#'   \code{RcppArmadillo} \code{C++} code.
+#'
+#'   If \code{typ_e = "pearson"} (the default) then \code{calc_skew()}
+#'   calculates the Pearson skewness using the third moment of the data.
+#'
+#'   If \code{typ_e = "quantile"} then it calculates the skewness using the
+#'   differences between the quantiles of the data.
+#'
+#'   If \code{typ_e = "nonparametric"} then it calculates the skewness as the
+#'   difference between the mean of the data minus its median, divided by the
+#'   standard deviation.
+#'   
+#'   The code examples below compare the function \code{calc_skew()} with the
+#'   skewness calculated using \code{R} code.
+#'
+#' @examples
+#' \dontrun{
+#' # Calculate VTI returns
+#' re_turns <- na.omit(rutils::etf_env$re_turns[ ,"VTI", drop=FALSE])
+#' # Calculate the Pearson skewness
+#' NPE::calc_skew(re_turns)
+#' # Compare NPE::calc_skew() with Pearson skewness
+#' calc_skewr <- function(x) {
+#'   x <- (x-mean(x)); nr <- NROW(x);
+#'   nr*sum(x^3)/(var(x))^1.5/(nr-1)/(nr-2)
+#' }  # end calc_skewr
+#' all.equal(NPE::calc_skew(re_turns), 
+#'   calc_skewr(re_turns), check.attributes=FALSE)
+#' # Compare the speed of RcppArmadillo with R code
+#' library(microbenchmark)
+#' summary(microbenchmark(
+#'   Rcpp=NPE::calc_skew(re_turns),
+#'   Rcode=calc_skewr(re_turns),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' # Calculate the quantile skewness
+#' NPE::calc_skew(re_turns, typ_e = "quantile", al_pha = 0.1)
+#' # Compare NPE::calc_skew() with quantile skewness
+#' calc_skewq <- function(x) {
+#'   	quantile_s <- quantile(x, c(0.25, 0.5, 0.75), type=5)
+#'   	(quantile_s[3] + quantile_s[1] - 2*quantile_s[2])/(quantile_s[3] - quantile_s[1])
+#' }  # end calc_skewq
+#' all.equal(drop(NPE::calc_skew(re_turns, typ_e = "quantile")), 
+#'   calc_skewq(re_turns), check.attributes=FALSE)
+#' # Compare the speed of RcppArmadillo with R code
+#' summary(microbenchmark(
+#'   Rcpp=NPE::calc_skew(re_turns, typ_e = "quantile"),
+#'   Rcode=calc_skewq(re_turns),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' # Calculate the nonparametric skewness
+#' NPE::calc_skew(re_turns, typ_e = "nonparametric")
+#' # Compare NPE::calc_skew() with R nonparametric skewness
+#' all.equal(drop(NPE::calc_skew(re_turns, typ_e = "nonparametric")), 
+#'   (mean(re_turns)-median(re_turns))/sd(re_turns), 
+#'   check.attributes=FALSE)
+#' # Compare the speed of RcppArmadillo with R code
+#' summary(microbenchmark(
+#'   Rcpp=NPE::calc_skew(re_turns, typ_e = "nonparametric"),
+#'   Rcode=(mean(re_turns)-median(re_turns))/sd(re_turns),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' }
+#' 
+#' @export
+calc_skew <- function(t_series, typ_e = "pearson", al_pha = 0.25) {
+    .Call(`_NPE_calc_skew`, t_series, typ_e, al_pha)
+}
+
+#' Calculate the nonparametric Hodges-Lehmann estimator of location for a
 #' \emph{vector} or a single-column \emph{time series} using \code{RcppArmadillo}
 #' and \code{RcppParallel}.
 #' 
@@ -170,7 +257,7 @@ hle <- function(vec_tor) {
     .Call(`_NPE_hle`, vec_tor)
 }
 
-#' Calculate the non parametric Theil-Sen estimator of dependency-covariance for two
+#' Calculate the nonparametric Theil-Sen estimator of dependency-covariance for two
 #' \emph{vectors}  using \code{RcppArmadillo}
 #' 
 #' @param \code{vector_x} A \emph{vector} independent (explanatory) data.
@@ -178,9 +265,10 @@ hle <- function(vec_tor) {
 #' 
 #' @return A column \emph{vector} containing two values i.e intercept and slope
 #'
-#' @details The function \code{theilSenEstimator()} calculates the Theil-Sen estimator of 
-#'   the \emph{vector}, using \code{RcppArmadillo} . The function \code{theilSenEstimator()}
-#'   is significantly faster than function \code{WRS::tsreg()} in \code{R}.
+#' @details The function \code{theilSenEstimator()} calculates the Theil-Sen
+#'   estimator of the \emph{vector}, using \code{RcppArmadillo} . The function
+#'   \code{theilSenEstimator()} is significantly faster than function
+#'   \code{WRS::tsreg()} in \code{R}.
 #'
 #' @examples
 #' \dontrun{
@@ -201,7 +289,7 @@ theilSenEstimator <- function(x, y) {
     .Call(`_NPE_theilSenEstimator`, x, y)
 }
 
-#' Performs a principle component analysis on given \emph{matrix} or \emph{time
+#' Performs a principal component analysis on given \emph{matrix} or \emph{time
 #' series} using \code{RcppArmadillo}.
 #' 
 #' @param \code{mat_rix} A \emph{matrix} or a \emph{time series}.
@@ -209,7 +297,7 @@ theilSenEstimator <- function(x, y) {
 #' @return A \emph{matrix} of variable loadings (i.e. a matrix whose columns contain
 #'   the eigenvectors).
 #'
-#' @details The function \code{calc_pca()} performs a principle component analysis
+#' @details The function \code{calc_pca()} performs a principal component analysis
 #'    on a \emph{matrix} using \code{RcppArmadillo}. 
 #'   
 #' @examples
@@ -232,8 +320,8 @@ calc_pca <- function(mat_rix) {
     .Call(`_NPE_calc_pca`, mat_rix)
 }
 
-#' Calculate the medcouple of a  \emph{vector} or a single-column \emph{time series}
-#' using \code{Rcpp}.
+#' Calculate the medcouple of a  \emph{vector} or a single-column \emph{time
+#' series} using \code{Rcpp}.
 #' 
 #' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
 #' @param \code{eps1} A \emph{double} Tolerance of the algorithm.

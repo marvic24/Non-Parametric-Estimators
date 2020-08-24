@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_pca}
 \alias{calc_pca}
-\title{Performs a principle component analysis on given \emph{matrix} or \emph{time
+\title{Performs a principal component analysis on given \emph{matrix} or \emph{time
 series} using \code{RcppArmadillo}.}
 \usage{
 calc_pca(mat_rix)
@@ -15,11 +15,11 @@ A \emph{matrix} of variable loadings (i.e. a matrix whose columns contain
   the eigenvectors).
 }
 \description{
-Performs a principle component analysis on given \emph{matrix} or \emph{time
+Performs a principal component analysis on given \emph{matrix} or \emph{time
 series} using \code{RcppArmadillo}.
 }
 \details{
-The function \code{calc_pca()} performs a principle component analysis
+The function \code{calc_pca()} performs a principal component analysis
    on a \emph{matrix} using \code{RcppArmadillo}.
 }
 \examples{

@@ -29,14 +29,14 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// medianAbsoluteDeviation
-double medianAbsoluteDeviation(arma::vec& vec_tor);
-RcppExport SEXP _NPE_medianAbsoluteDeviation(SEXP vec_torSEXP) {
+// calc_mad
+arma::mat calc_mad(arma::mat& t_series);
+RcppExport SEXP _NPE_calc_mad(SEXP t_seriesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec& >::type vec_tor(vec_torSEXP);
-    rcpp_result_gen = Rcpp::wrap(medianAbsoluteDeviation(vec_tor));
+    Rcpp::traits::input_parameter< arma::mat& >::type t_series(t_seriesSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_mad(t_series));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -49,6 +49,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type vec_tor(vec_torSEXP);
     Rcpp::traits::input_parameter< int >::type look_back(look_backSEXP);
     rcpp_result_gen = Rcpp::wrap(rolling_mad(vec_tor, look_back));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calc_skew
+arma::mat calc_skew(arma::mat t_series, std::string typ_e, double al_pha);
+RcppExport SEXP _NPE_calc_skew(SEXP t_seriesSEXP, SEXP typ_eSEXP, SEXP al_phaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type t_series(t_seriesSEXP);
+    Rcpp::traits::input_parameter< std::string >::type typ_e(typ_eSEXP);
+    Rcpp::traits::input_parameter< double >::type al_pha(al_phaSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_skew(t_series, typ_e, al_pha));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -156,8 +169,9 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_NPE_med_ian", (DL_FUNC) &_NPE_med_ian, 1},
     {"_NPE_rolling_median", (DL_FUNC) &_NPE_rolling_median, 2},
-    {"_NPE_medianAbsoluteDeviation", (DL_FUNC) &_NPE_medianAbsoluteDeviation, 1},
+    {"_NPE_calc_mad", (DL_FUNC) &_NPE_calc_mad, 1},
     {"_NPE_rolling_mad", (DL_FUNC) &_NPE_rolling_mad, 2},
+    {"_NPE_calc_skew", (DL_FUNC) &_NPE_calc_skew, 3},
     {"_NPE_hle", (DL_FUNC) &_NPE_hle, 1},
     {"_NPE_theilSenEstimator", (DL_FUNC) &_NPE_theilSenEstimator, 2},
     {"_NPE_calc_pca", (DL_FUNC) &_NPE_calc_pca, 1},

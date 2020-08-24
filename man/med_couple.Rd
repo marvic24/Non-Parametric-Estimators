@@ -2,8 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{med_couple}
 \alias{med_couple}
-\title{Calculate the medcouple of a  \emph{vector} or a single-column \emph{time series}
-using \code{Rcpp}.}
+\title{Calculate the medcouple of a  \emph{vector} or a single-column \emph{time
+series} using \code{Rcpp}.}
 \usage{
 med_couple(x, eps1 = 1e-14, eps2 = 1e-15)
 }
@@ -18,8 +18,8 @@ med_couple(x, eps1 = 1e-14, eps2 = 1e-15)
 A single \emph{double} value representing medcouple of the vector.
 }
 \description{
-Calculate the medcouple of a  \emph{vector} or a single-column \emph{time series}
-using \code{Rcpp}.
+Calculate the medcouple of a  \emph{vector} or a single-column \emph{time
+series} using \code{Rcpp}.
 }
 \details{
 The function \code{med_couple()} calculates the medcouple of the \emph{vector},

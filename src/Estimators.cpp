@@ -13,34 +13,34 @@ using namespace arma;
 using namespace std;
 
 //////////////////////////////////////////
-// Functions for Non Parametric Estimators
+// Functions for Nonparametric Estimators
 //////////////////////////////////////////
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the median of a  \emph{vector} or a single-column \emph{time series}
-//' using \code{RcppArmadillo}.
-//' 
+//' Calculate the median of a  \emph{vector} or a single-column \emph{time
+//' series} using \code{RcppArmadillo}.
+//'
 //' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
-//' 
+//'
 //' @return A single \emph{double} value representing median of the vector.
 //'
-//' @details The function \code{med_ian()} calculates the median of the \emph{vector},
-//'   using \code{RcppArmadillo}. The function \code{med_ian()} is several times faster
-//'   than \code{median()} in \code{R}.
+//' @details The function \code{med_ian()} calculates the median of the
+//'   \emph{vector}, using \code{RcppArmadillo}. The function \code{med_ian()}
+//'   is several times faster than \code{median()} in \code{R}.
 //'
 //' @examples
 //' \dontrun{
-//' # Create a vector of random returns
-//' re_turns <- rnorm(1e6)
+//' # Calculate VTI returns
+//' re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI"])
 //' # Compare med_ian() with median()
 //' all.equal(drop(NPE::med_ian(re_turns)), 
 //'   median(re_turns))
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=NPE::med_ian(re_turns),
-//'   rcode=median(re_turns),
+//'   Rcpp=NPE::med_ian(re_turns),
+//'   Rcode=median(re_turns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -109,16 +109,16 @@ struct parallel_rolling_median : public Worker
 //'
 //' @examples
 //' \dontrun{
-//' # Create a vector of random returns
-//' re_turns <- rnorm(1e6)
+//' # Calculate VTI returns
+//' re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI"])
 //' # Compare rolling_median() with roll::roll_median()
-//' all.equal(drop(NPE::rolling_median(re_turns, look_back=11)), 
-//'   roll::roll_median(re_turns, width=11))
+//' all.equal(drop(NPE::rolling_median(re_turns, look_back=11))[-(1:10)], 
+//'   zoo::coredata(roll::roll_median(re_turns, width=11))[-(1:10)])
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   parallel_rcpp=NPE::rolling_median(re_turns),
-//'   rcpp=roll::roll_median(re_turns),
+//'   parallel_rcpp=NPE::rolling_median(re_turns, look_back=11),
+//'   roll=roll::roll_median(re_turns, width=11),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -141,41 +141,47 @@ arma::vec rolling_median(NumericVector vec_tor, int look_back) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the Median absolute deviation of a  \emph{vector} or a single-column
-//'  \emph{time series} using \code{RcppArmadillo}.
-//' 
-//' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
-//' 
-//' @return A single \emph{double} value representing median absolue deviation of 
-//'   the vector.
+//' Calculate the Median Absolute Deviations (\emph{MAD}) of the columns of a
+//' \emph{time series} or a \emph{matrix} using \code{RcppArmadillo}.
 //'
-//' @details The function \code{medianAbsoluteDeviation()} calculates the median of 
-//'   the \emph{vector}, using \code{RcppArmadillo}. The function \code{medianAbsoluteDeviation()}
-//'   is several times faster than \code{mad()} in \code{R}.
+//' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
+//'
+//' @return A single-row matrix with the Median Absolute Deviations \emph{MAD}
+//'   of the columns of \code{t_series}.
+//'
+//' @details The function \code{calc_mad()} calculates the Median Absolute
+//'   Deviations \emph{MAD} of the columns of a \emph{time series} or a
+//'   \emph{matrix} of data using \code{RcppArmadillo} \code{C++} code.
+//'
+//'   The function \code{calc_mad()} performs the same calculation as the
+//'   function \code{stats::mad()}, but it's much faster because it uses
+//'   \code{RcppArmadillo} \code{C++} code.
 //'
 //' @examples
 //' \dontrun{
-//' # Create a vector of random returns
-//' re_turns <- rnorm(1e6)
-//' # Compare medianAbsoluteDeviation() with mad()
-//' all.equal(drop(NPE::medianAbsoluteDeviation(re_turns)), 
-//'   mad(re_turns))
-//' # Compare the speed of RcppArmadillo with R code
+//' # Calculate VTI returns
+//' re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI", drop=FALSE])
+//' # Compare calc_mad() with stats::mad()
+//' all.equal(drop(NPE::calc_mad(re_turns)), 
+//'   mad(re_turns)/1.4826)
+//' # Compare the speed of RcppArmadillo with stats::mad()
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=NPE::medianAbsoluteDeviation(re_turns),
-//'   rcode=mad(re_turns),
+//'   Rcpp=NPE::calc_mad(re_turns),
+//'   Rcode=mad(re_turns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-double medianAbsoluteDeviation(arma::vec& vec_tor) {
+arma::mat calc_mad(arma::mat& t_series) {
   
-  return med_ian(arma::abs(vec_tor - med_ian(vec_tor)));
+  // De-median the columns of t_series
+  t_series.each_row() -= arma::median(t_series);
   
-}  // end medianAbsoluteDeviation
-
+  return arma::median(arma::abs(t_series));
+  
+}  // end calc_mad
 
 
 
@@ -220,8 +226,9 @@ struct parallel_rolling_mad : public Worker
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the rolling median absolute deviation over a \emph{vector} or
-//' a single-column \emph{time series} using \code{RcppArmadillo} and \code{RcppParallel}.
+//' Calculate the rolling median absolute deviation over a \emph{vector} or a
+//' single-column \emph{time series} using \code{RcppArmadillo} and
+//' \code{RcppParallel}.
 //' 
 //' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
 //' @param \code{look_back} The length of look back interval, equal to the
@@ -258,10 +265,121 @@ arma::vec rolling_mad(NumericVector vec_tor, int look_back) {
 
 
 
+////////////////////////////////////////////////////////////
+//' Calculate the skewness of the columns of a \emph{time series} or a
+//' \emph{matrix} using \code{RcppArmadillo}.
+//'
+//' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
+//'
+//' @param \code{typ_e} A \emph{string} specifying the type of skewness (see
+//'   Details). (The default is the \code{typ_e = "pearson"}.)
+//'
+//' @param \code{al_pha} The confidence level for calculating the quantiles.
+//'   (the default is \code{al_pha = 0.25}).
+//'
+//' @return A single-row matrix with the skewness of the columns of
+//'   \code{t_series}.
+//'
+//' @details The function \code{calc_skew()} calculates the skewness of the
+//'   columns of a \emph{time series} or a \emph{matrix} of data using
+//'   \code{RcppArmadillo} \code{C++} code.
+//'
+//'   If \code{typ_e = "pearson"} (the default) then \code{calc_skew()}
+//'   calculates the Pearson skewness using the third moment of the data.
+//'
+//'   If \code{typ_e = "quantile"} then it calculates the skewness using the
+//'   differences between the quantiles of the data.
+//'
+//'   If \code{typ_e = "nonparametric"} then it calculates the skewness as the
+//'   difference between the mean of the data minus its median, divided by the
+//'   standard deviation.
+//'   
+//'   The code examples below compare the function \code{calc_skew()} with the
+//'   skewness calculated using \code{R} code.
+//'
+//' @examples
+//' \dontrun{
+//' # Calculate VTI returns
+//' re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI", drop=FALSE])
+//' # Calculate the Pearson skewness
+//' NPE::calc_skew(re_turns)
+//' # Compare NPE::calc_skew() with Pearson skewness
+//' calc_skewr <- function(x) {
+//'   x <- (x-mean(x)); nr <- NROW(x);
+//'   nr*sum(x^3)/(var(x))^1.5/(nr-1)/(nr-2)
+//' }  # end calc_skewr
+//' all.equal(NPE::calc_skew(re_turns), 
+//'   calc_skewr(re_turns), check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcpp=NPE::calc_skew(re_turns),
+//'   Rcode=calc_skewr(re_turns),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' # Calculate the quantile skewness
+//' NPE::calc_skew(re_turns, typ_e = "quantile", al_pha = 0.1)
+//' # Compare NPE::calc_skew() with quantile skewness
+//' calc_skewq <- function(x) {
+//'   	quantile_s <- quantile(x, c(0.25, 0.5, 0.75), type=5)
+//'   	(quantile_s[3] + quantile_s[1] - 2*quantile_s[2])/(quantile_s[3] - quantile_s[1])
+//' }  # end calc_skewq
+//' all.equal(drop(NPE::calc_skew(re_turns, typ_e = "quantile")), 
+//'   calc_skewq(re_turns), check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' summary(microbenchmark(
+//'   Rcpp=NPE::calc_skew(re_turns, typ_e = "quantile"),
+//'   Rcode=calc_skewq(re_turns),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' # Calculate the nonparametric skewness
+//' NPE::calc_skew(re_turns, typ_e = "nonparametric")
+//' # Compare NPE::calc_skew() with R nonparametric skewness
+//' all.equal(drop(NPE::calc_skew(re_turns, typ_e = "nonparametric")), 
+//'   (mean(re_turns)-median(re_turns))/sd(re_turns), 
+//'   check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' summary(microbenchmark(
+//'   Rcpp=NPE::calc_skew(re_turns, typ_e = "nonparametric"),
+//'   Rcode=(mean(re_turns)-median(re_turns))/sd(re_turns),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat calc_skew(arma::mat t_series,
+                    std::string typ_e = "pearson", 
+                    double al_pha = 0.25) {
+  // switch statement for all the different types of skew
+  switch(typ_e[0]) {
+  case 'p' : {  // Pearson
+    double num_rows = t_series.n_rows;
+    arma::mat mean_s = arma::mean(t_series);
+    arma::mat var_s = arma::var(t_series);
+    // De-mean the columns of t_series
+    t_series.each_row() -= mean_s;
+    return (num_rows/(num_rows-1)/(num_rows-2))*arma::sum(arma::pow(t_series, 3))/arma::pow(var_s, 1.5);
+  }  // end pearson
+  case 'q' : {  // Quantile
+    arma::vec prob_s = {al_pha, 0.5, 1.0 - al_pha};
+    arma::mat quantile_s = quantile(t_series, prob_s);
+    return (quantile_s.row(2) + quantile_s.row(0) - 2*quantile_s.row(1))/(quantile_s.row(2) - quantile_s.row(0));
+  }  // end quantile
+  case 'n' : {  // Nonparametric
+    return (arma::mean(t_series) - arma::median(t_series))/arma::stddev(t_series);
+  }  // end nonparametric
+  default : {
+    cout << "Invalid typ_e" << endl;
+    return 0;
+  }  // end default
+  }  // end switch
+  
+}  // end calc_skew
+
+
+
 
 ////////////////////////////////////////////////////////////
-//' Worker function for calculating pair averages needed for Hodges-Lehmann estimator
-//' by using parallel processing.
+//' Worker function for calculating pair averages needed for Hodges-Lehmann
+//' estimator by using parallel processing.
 
 struct pair_averages : public Worker
 {
@@ -294,7 +412,7 @@ struct pair_averages : public Worker
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the non parametric Hodges-Lehmann estimator of location for a
+//' Calculate the nonparametric Hodges-Lehmann estimator of location for a
 //' \emph{vector} or a single-column \emph{time series} using \code{RcppArmadillo}
 //' and \code{RcppParallel}.
 //' 
@@ -310,16 +428,16 @@ struct pair_averages : public Worker
 //'
 //' @examples
 //' \dontrun{
-//' # Create a vector of random returns
-//' re_turns <- rnorm(1e6)
+//' # Calculate VTI returns
+//' re_turns <- zoo::coredata(na.omit(NPE::etf_env$re_turns[ ,"VTI"]))
 //' # Compare hle() with wilcox.test()
-//' all.equal(drop(NPE::hle(re_turns)), 
-//'   wilcox.test(re_turns, conf.int = TRUE))
+//' all.equal(wilcox.test(re_turns, conf.int = TRUE)$estimate, 
+//'   drop(NPE::hle(re_turns)), check.attributes=FALSE)
 //' # Compare the speed of RcppParallel with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=NPE::hle(re_turns),
-//'   rcode=wilcox.test(re_turns, conf.int = TRUE),
+//'   Rcpp=NPE::hle(re_turns),
+//'   Rcode=wilcox.test(re_turns, conf.int = TRUE),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -337,11 +455,6 @@ double hle(NumericVector vec_tor) {
   return med_ian(pairs);
   
 }  // end hle
-
-
-
-
-
 
 
 
@@ -368,29 +481,35 @@ NumericVector ts_proc(arma::vec vector_x, arma::vec vector_y) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the non parametric Theil-Sen estimator of dependency-covariance for two
-//' \emph{vectors}  using \code{RcppArmadillo}
-//' 
+//' Calculate the nonparametric Theil-Sen estimator of dependency-covariance for
+//' two \emph{vectors}  using \code{RcppArmadillo}
+//'
 //' @param \code{vector_x} A \emph{vector} independent (explanatory) data.
 //' @param \code{vector_y} A \emph{vector} dependent data.
-//' 
+//'
 //' @return A column \emph{vector} containing two values i.e intercept and slope
 //'
-//' @details The function \code{theilSenEstimator()} calculates the Theil-Sen estimator of 
-//'   the \emph{vector}, using \code{RcppArmadillo} . The function \code{theilSenEstimator()}
-//'   is significantly faster than function \code{WRS::tsreg()} in \code{R}.
+//' @details The function \code{theilSenEstimator()} calculates the Theil-Sen
+//'   estimator of the \emph{vector}, using \code{RcppArmadillo} . The function
+//'   \code{theilSenEstimator()} is significantly faster than function
+//'   \code{WRS::tsreg()} in \code{R}.
 //'
 //' @examples
 //' \dontrun{
-//' # Create a vector of random returns
+//' # Create vectors of random returns
 //' vector_x <- rnorm(10)
-//' vactor_y <- rnorm(10)
-//' # Compare theilSenEstimator() with tsreg()
+//' vector_y <- rnorm(10)
+//' # Install package akima and WRS
+//' install.packages("akima")
+//' install.packages("WRS", repos="http://R-Forge.R-project.org")
+//' # Compare theilSenEstimator() with WRS::tsreg()
+//' all.equal(NPE::theilSenEstimator(vector_x, vector_y), 
+//'   WRS::tsreg(vector_x, vector_y), check.attributes=FALSE)
 //' # Compare the speed of RcppParallel with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=NPE::theilSenEstimator(vector_x, vector_y),
-//'   rcode=WRS(vector_x, vector_y),
+//'   Rcpp=NPE::theilSenEstimator(vector_x, vector_y),
+//'   Rcode=WRS::tsreg(vector_x, vector_y),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -411,7 +530,7 @@ NumericVector theilSenEstimator(arma::vec x, arma::vec y) {
 
 
 ////////////////////////////////////////////////////////////
-//' Performs a principle component analysis on given \emph{matrix} or \emph{time
+//' Performs a principal component analysis on given \emph{matrix} or \emph{time
 //' series} using \code{RcppArmadillo}.
 //' 
 //' @param \code{mat_rix} A \emph{matrix} or a \emph{time series}.
@@ -419,7 +538,7 @@ NumericVector theilSenEstimator(arma::vec x, arma::vec y) {
 //' @return A \emph{matrix} of variable loadings (i.e. a matrix whose columns contain
 //'   the eigenvectors).
 //'
-//' @details The function \code{calc_pca()} performs a principle component analysis
+//' @details The function \code{calc_pca()} performs a principal component analysis
 //'    on a \emph{matrix} using \code{RcppArmadillo}. 
 //'   
 //' @examples
@@ -432,8 +551,8 @@ NumericVector theilSenEstimator(arma::vec x, arma::vec y) {
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=NPE::calc_pca(re_turns),
-//'   rcode=prcomp(re_turns),
+//'   Rcpp=NPE::calc_pca(re_turns),
+//'   Rcode=prcomp(re_turns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -518,11 +637,9 @@ double wmedian(const std::vector<double>& A, const std::vector<long>& W) {
   
 }
 
-// Dunction to calculate medcouple.
-// This code is refered from http://inversethought.com/hg/medcouple/file/default/jmedcouple.c%2B%2B.
-double medcouple(const NumericVector X, double eps1, double eps2)
-  
-{
+// Function to calculate medcouple.
+// The below is open source code from http://inversethought.com/hg/medcouple/file/default/jmedcouple.c%2B%2B
+double medcouple(const NumericVector X, double eps1, double eps2) {
   
   long n = X.size(), n2 = (n - 1) / 2;
   
@@ -579,16 +696,11 @@ double medcouple(const NumericVector X, double eps1, double eps2)
   
   
   /*
-   
    Kernel function h for the medcouple, closing over the values of
-   
    Zplus and Zminus just defined above.
-   
-   
+
    In case a and be are within epsilon of the median, the kernel
-   
    is the signum of their position.
-   
    */
   
   auto h_kern = [&](long i, long j) {
@@ -640,7 +752,6 @@ double medcouple(const NumericVector X, double eps1, double eps2)
     // Compute new left and right boundaries, based on the weighted median
     
     std::vector<long> P(n_plus), Q(n_plus);
-    
     {
       long j = 0;
       
@@ -706,11 +817,9 @@ double medcouple(const NumericVector X, double eps1, double eps2)
   } // end for
   
   std::nth_element(A.begin(), A.begin() + (medc_idx - Ltot), A.end(),
-              
-              [](double x, double y) {return x > y; });
+                   [](double x, double y) {return x > y; });
   
-  
-  
+
   double Am = A[medc_idx - Ltot];
   return Am;
   
@@ -719,11 +828,9 @@ double medcouple(const NumericVector X, double eps1, double eps2)
 
 
 
-
-
 ////////////////////////////////////////////////////////////
-//' Calculate the medcouple of a  \emph{vector} or a single-column \emph{time series}
-//' using \code{Rcpp}.
+//' Calculate the medcouple of a  \emph{vector} or a single-column \emph{time
+//' series} using \code{Rcpp}.
 //' 
 //' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
 //' @param \code{eps1} A \emph{double} Tolerance of the algorithm.
@@ -746,7 +853,7 @@ double medcouple(const NumericVector X, double eps1, double eps2)
 //' # Compare the speed of NPE with Robustbase code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=NPE::med_couple(re_turns),
+//'   Rcpp=NPE::med_couple(re_turns),
 //'   robustbase=robustbase::mc(re_turns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
@@ -757,5 +864,5 @@ double med_couple(NumericVector x, double eps1 = 1e-14, double eps2 = 1e-15) {
   
   return medcouple(x, eps1, eps2);
   
-}
+}  // end med_couple
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{theilSenEstimator}
 \alias{theilSenEstimator}
-\title{Calculate the non parametric Theil-Sen estimator of dependency-covariance for two
+\title{Calculate the nonparametric Theil-Sen estimator of dependency-covariance for two
 \emph{vectors}  using \code{RcppArmadillo}}
 \usage{
 theilSenEstimator(x, y)
@@ -16,13 +16,14 @@ theilSenEstimator(x, y)
 A column \emph{vector} containing two values i.e intercept and slope
 }
 \description{
-Calculate the non parametric Theil-Sen estimator of dependency-covariance for two
+Calculate the nonparametric Theil-Sen estimator of dependency-covariance for two
 \emph{vectors}  using \code{RcppArmadillo}
 }
 \details{
-The function \code{theilSenEstimator()} calculates the Theil-Sen estimator of 
-  the \emph{vector}, using \code{RcppArmadillo} . The function \code{theilSenEstimator()}
-  is significantly faster than function \code{WRS::tsreg()} in \code{R}.
+The function \code{theilSenEstimator()} calculates the Theil-Sen
+  estimator of the \emph{vector}, using \code{RcppArmadillo} . The function
+  \code{theilSenEstimator()} is significantly faster than function
+  \code{WRS::tsreg()} in \code{R}.
 }
 \examples{
 \dontrun{
