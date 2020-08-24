@@ -325,7 +325,7 @@ calc_pca <- function(mat_rix) {
 #' 
 #' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
 #' @param \code{eps1} A \emph{double} Tolerance of the algorithm.
-#' @param \code{eps2} A \emph{couble} Tolerance of the algorithm..
+#' @param \code{eps2} A \emph{double} Tolerance of the algorithm..
 #' 
 #' 
 #' @return A single \emph{double} value representing medcouple of the vector.

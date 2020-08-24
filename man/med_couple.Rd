@@ -12,7 +12,7 @@ med_couple(x, eps1 = 1e-14, eps2 = 1e-15)
 
 \item{\code{eps1}}{A \emph{double} Tolerance of the algorithm.}
 
-\item{\code{eps2}}{A \emph{couble} Tolerance of the algorithm..}
+\item{\code{eps2}}{A \emph{double} Tolerance of the algorithm..}
 }
 \value{
 A single \emph{double} value representing medcouple of the vector.
