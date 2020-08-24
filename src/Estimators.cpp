@@ -432,9 +432,14 @@ struct pair_averages : public Worker
 //' @examples
 //' \dontrun{
 //' # Calculate VTI returns
-//' re_turns <- zoo::coredata(na.omit(NPE::etf_env$re_turns[ ,"VTI"]))
-//' # Compare hle() with wilcox.test()
+//' re_turns <- as.numeric(na.omit(NPE::etf_env$re_turns[ ,"VTI"]))
+//' # Compare hle() with wilcox.test() - equal only approximately
 //' all.equal(wilcox.test(re_turns, conf.int = TRUE)$estimate, 
+//'   drop(NPE::hle(re_turns)), check.attributes=FALSE)
+//' # Install package ICSNP for nonparametric statistics
+//' install.packages("ICSNP")
+//' # Compare hle() with ICSNP::hl.loc() - almost equal
+//' all.equal(ICSNP::hl.loc(re_turns), 
 //'   drop(NPE::hle(re_turns)), check.attributes=FALSE)
 //' # Compare the speed of RcppParallel with R code
 //' library(microbenchmark)
@@ -484,15 +489,16 @@ NumericVector ts_proc(arma::vec vector_x, arma::vec vector_y) {
 
 ////////////////////////////////////////////////////////////
 //' Calculate the nonparametric Theil-Sen estimator of dependency-covariance for
-//' two \emph{vectors}  using \code{RcppArmadillo}
+//' two \emph{vectors} using \code{RcppArmadillo}
 //'
 //' @param \code{vector_x} A \emph{vector} independent (explanatory) data.
 //' @param \code{vector_y} A \emph{vector} dependent data.
 //'
-//' @return A column \emph{vector} containing two values i.e intercept and slope
+//' @return A column \emph{vector} containing two values i.e intercept and
+//'   slope.
 //'
 //' @details The function \code{theilSenEstimator()} calculates the Theil-Sen
-//'   estimator of the \emph{vector}, using \code{RcppArmadillo} . The function
+//'   estimator  using \code{RcppArmadillo}. The function
 //'   \code{theilSenEstimator()} is significantly faster than function
 //'   \code{WRS::tsreg()} in \code{R}.
 //'
@@ -506,7 +512,7 @@ NumericVector ts_proc(arma::vec vector_x, arma::vec vector_y) {
 //' install.packages("WRS", repos="http://R-Forge.R-project.org")
 //' # Compare theilSenEstimator() with WRS::tsreg()
 //' all.equal(NPE::theilSenEstimator(vector_x, vector_y), 
-//'   WRS::tsreg(vector_x, vector_y, FALSE), check.attributes=FALSE)
+//'   WRS::tsreg(vector_x, vector_y, FALSE)$coef, check.attributes=FALSE)
 //' # Compare the speed of RcppParallel with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
