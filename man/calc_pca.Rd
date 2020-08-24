@@ -32,8 +32,8 @@ all.equal(drop(NPE::calc_pca(re_turns)),
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=NPE::calc_pca(re_turns),
-  rcode=prcomp(re_turns),
+  Rcpp=NPE::calc_pca(re_turns),
+  Rcode=prcomp(re_turns),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

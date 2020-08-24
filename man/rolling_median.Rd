@@ -29,16 +29,16 @@ The function \code{rolling_median()} calculates a vector of
 }
 \examples{
 \dontrun{
-# Create a vector of random returns
-re_turns <- rnorm(1e6)
+# Calculate VTI returns
+re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI"])
 # Compare rolling_median() with roll::roll_median()
-all.equal(drop(NPE::rolling_median(re_turns, look_back=11)), 
-  roll::roll_median(re_turns, width=11))
+all.equal(drop(NPE::rolling_median(re_turns, look_back=11))[-(1:10)], 
+  zoo::coredata(roll::roll_median(re_turns, width=11))[-(1:10)])
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  parallel_rcpp=NPE::rolling_median(re_turns),
-  rcpp=roll::roll_median(re_turns),
+  parallel_rcpp=NPE::rolling_median(re_turns, look_back=11),
+  roll=roll::roll_median(re_turns, width=11),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

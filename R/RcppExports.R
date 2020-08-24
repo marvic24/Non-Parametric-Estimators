@@ -25,16 +25,16 @@ NULL
 #'
 #' @examples
 #' \dontrun{
-#' # Create a vector of random returns
-#' re_turns <- rnorm(1e6)
+#' # Calculate VTI returns
+#' re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI"])
 #' # Compare med_ian() with median()
 #' all.equal(drop(NPE::med_ian(re_turns)), 
 #'   median(re_turns))
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=NPE::med_ian(re_turns),
-#'   rcode=median(re_turns),
+#'   Rcpp=NPE::med_ian(re_turns),
+#'   Rcode=median(re_turns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -60,16 +60,16 @@ med_ian <- function(vec_tor) {
 #'
 #' @examples
 #' \dontrun{
-#' # Create a vector of random returns
-#' re_turns <- rnorm(1e6)
+#' # Calculate VTI returns
+#' re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI"])
 #' # Compare rolling_median() with roll::roll_median()
-#' all.equal(drop(NPE::rolling_median(re_turns, look_back=11)), 
-#'   roll::roll_median(re_turns, width=11))
+#' all.equal(drop(NPE::rolling_median(re_turns, look_back=11))[-(1:10)], 
+#'   zoo::coredata(roll::roll_median(re_turns, width=11))[-(1:10)])
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   parallel_rcpp=NPE::rolling_median(re_turns),
-#'   rcpp=roll::roll_median(re_turns),
+#'   parallel_rcpp=NPE::rolling_median(re_turns, look_back=11),
+#'   roll=roll::roll_median(re_turns, width=11),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -78,13 +78,13 @@ rolling_median <- function(vec_tor, look_back) {
     .Call(`_NPE_rolling_median`, vec_tor, look_back)
 }
 
-#' Calculate the Median Absolute Deviations \emph{MAD} of the columns of a
+#' Calculate the Median Absolute Deviations (\emph{MAD}) of the columns of a
 #' \emph{time series} or a \emph{matrix} using \code{RcppArmadillo}.
 #'
 #' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
 #'
-#' @return A row vector with the Median Absolute Deviations \emph{MAD} of
-#'   the columns of \code{t_series} matrix.
+#' @return A single-row matrix with the Median Absolute Deviations \emph{MAD}
+#'   of the columns of \code{t_series}.
 #'
 #' @details The function \code{calc_mad()} calculates the Median Absolute
 #'   Deviations \emph{MAD} of the columns of a \emph{time series} or a
@@ -97,7 +97,7 @@ rolling_median <- function(vec_tor, look_back) {
 #' @examples
 #' \dontrun{
 #' # Calculate VTI returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[ ,"VTI", drop=FALSE])
+#' re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI", drop=FALSE])
 #' # Compare calc_mad() with stats::mad()
 #' all.equal(drop(NPE::calc_mad(re_turns)), 
 #'   mad(re_turns)/1.4826)
@@ -146,13 +146,13 @@ rolling_mad <- function(vec_tor, look_back) {
 #'
 #' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
 #'
-#' @param \code{typ_e} A \emph{string} specifying the objective for calculating
-#'   the weights (see Details). (The default is the \code{typ_e = "pearson"}.)
+#' @param \code{typ_e} A \emph{string} specifying the type of skewness (see
+#'   Details). (The default is the \code{typ_e = "pearson"}.)
 #'
 #' @param \code{al_pha} The confidence level for calculating the quantiles.
-#'   (the default is \code{0.25}).
+#'   (the default is \code{al_pha = 0.25}).
 #'
-#' @return A row vector equal to the skewness of the columns of
+#' @return A single-row matrix with the skewness of the columns of
 #'   \code{t_series}.
 #'
 #' @details The function \code{calc_skew()} calculates the skewness of the
@@ -175,7 +175,7 @@ rolling_mad <- function(vec_tor, look_back) {
 #' @examples
 #' \dontrun{
 #' # Calculate VTI returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[ ,"VTI", drop=FALSE])
+#' re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI", drop=FALSE])
 #' # Calculate the Pearson skewness
 #' NPE::calc_skew(re_turns)
 #' # Compare NPE::calc_skew() with Pearson skewness
@@ -239,16 +239,16 @@ calc_skew <- function(t_series, typ_e = "pearson", al_pha = 0.25) {
 #'
 #' @examples
 #' \dontrun{
-#' # Create a vector of random returns
-#' re_turns <- rnorm(1e6)
+#' # Calculate VTI returns
+#' re_turns <- zoo::coredata(na.omit(NPE::etf_env$re_turns[ ,"VTI"]))
 #' # Compare hle() with wilcox.test()
-#' all.equal(drop(NPE::hle(re_turns)), 
-#'   wilcox.test(re_turns, conf.int = TRUE))
+#' all.equal(wilcox.test(re_turns, conf.int = TRUE)$estimate, 
+#'   drop(NPE::hle(re_turns)), check.attributes=FALSE)
 #' # Compare the speed of RcppParallel with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=NPE::hle(re_turns),
-#'   rcode=wilcox.test(re_turns, conf.int = TRUE),
+#'   Rcpp=NPE::hle(re_turns),
+#'   Rcode=wilcox.test(re_turns, conf.int = TRUE),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -257,12 +257,12 @@ hle <- function(vec_tor) {
     .Call(`_NPE_hle`, vec_tor)
 }
 
-#' Calculate the nonparametric Theil-Sen estimator of dependency-covariance for two
-#' \emph{vectors}  using \code{RcppArmadillo}
-#' 
+#' Calculate the nonparametric Theil-Sen estimator of dependency-covariance for
+#' two \emph{vectors}  using \code{RcppArmadillo}
+#'
 #' @param \code{vector_x} A \emph{vector} independent (explanatory) data.
 #' @param \code{vector_y} A \emph{vector} dependent data.
-#' 
+#'
 #' @return A column \emph{vector} containing two values i.e intercept and slope
 #'
 #' @details The function \code{theilSenEstimator()} calculates the Theil-Sen
@@ -272,15 +272,20 @@ hle <- function(vec_tor) {
 #'
 #' @examples
 #' \dontrun{
-#' # Create a vector of random returns
+#' # Create vectors of random returns
 #' vector_x <- rnorm(10)
-#' vactor_y <- rnorm(10)
-#' # Compare theilSenEstimator() with tsreg()
+#' vector_y <- rnorm(10)
+#' # Install package akima and WRS
+#' install.packages("akima")
+#' install.packages("WRS", repos="http://R-Forge.R-project.org")
+#' # Compare theilSenEstimator() with WRS::tsreg()
+#' all.equal(NPE::theilSenEstimator(vector_x, vector_y), 
+#'   WRS::tsreg(vector_x, vector_y, FALSE), check.attributes=FALSE)
 #' # Compare the speed of RcppParallel with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=NPE::theilSenEstimator(vector_x, vector_y),
-#'   rcode=WRS(vector_x, vector_y),
+#'   Rcpp=NPE::theilSenEstimator(vector_x, vector_y),
+#'   Rcode=WRS::tsreg(vector_x, vector_y, FALSE),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -310,8 +315,8 @@ theilSenEstimator <- function(x, y) {
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=NPE::calc_pca(re_turns),
-#'   rcode=prcomp(re_turns),
+#'   Rcpp=NPE::calc_pca(re_turns),
+#'   Rcode=prcomp(re_turns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -344,7 +349,7 @@ calc_pca <- function(mat_rix) {
 #' # Compare the speed of NPE with Robustbase code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=NPE::med_couple(re_turns),
+#'   Rcpp=NPE::med_couple(re_turns),
 #'   robustbase=robustbase::mc(re_turns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }

@@ -36,7 +36,7 @@ all.equal(drop(NPE::med_couple(re_turns)),
 # Compare the speed of NPE with Robustbase code
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=NPE::med_couple(re_turns),
+  Rcpp=NPE::med_couple(re_turns),
   robustbase=robustbase::mc(re_turns),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

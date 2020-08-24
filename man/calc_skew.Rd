@@ -10,14 +10,14 @@ calc_skew(t_series, typ_e = "pearson", al_pha = 0.25)
 \arguments{
 \item{\code{t_series}}{A \emph{time series} or a \emph{matrix} of data.}
 
-\item{\code{typ_e}}{A \emph{string} specifying the objective for calculating
-the weights (see Details). (The default is the \code{typ_e = "pearson"}.)}
+\item{\code{typ_e}}{A \emph{string} specifying the type of skewness (see
+Details). (The default is the \code{typ_e = "pearson"}.)}
 
 \item{\code{al_pha}}{The confidence level for calculating the quantiles.
-(the default is \code{0.25}).}
+(the default is \code{al_pha = 0.25}).}
 }
 \value{
-A row vector equal to the skewness of the columns of
+A single-row matrix with the skewness of the columns of
   \code{t_series}.
 }
 \description{
@@ -45,7 +45,7 @@ The function \code{calc_skew()} calculates the skewness of the
 \examples{
 \dontrun{
 # Calculate VTI returns
-re_turns <- na.omit(rutils::etf_env$re_turns[ ,"VTI", drop=FALSE])
+re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI", drop=FALSE])
 # Calculate the Pearson skewness
 NPE::calc_skew(re_turns)
 # Compare NPE::calc_skew() with Pearson skewness

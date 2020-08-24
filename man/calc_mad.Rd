@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_mad}
 \alias{calc_mad}
-\title{Calculate the Median Absolute Deviations \emph{MAD} of the columns of a
+\title{Calculate the Median Absolute Deviations (\emph{MAD}) of the columns of a
 \emph{time series} or a \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
 calc_mad(t_series)
@@ -11,11 +11,11 @@ calc_mad(t_series)
 \item{\code{t_series}}{A \emph{time series} or a \emph{matrix} of data.}
 }
 \value{
-A row vector with the Median Absolute Deviations \emph{MAD} of
-  the columns of \code{t_series} matrix.
+A single-row matrix with the Median Absolute Deviations \emph{MAD}
+  of the columns of \code{t_series}.
 }
 \description{
-Calculate the Median Absolute Deviations \emph{MAD} of the columns of a
+Calculate the Median Absolute Deviations (\emph{MAD}) of the columns of a
 \emph{time series} or a \emph{matrix} using \code{RcppArmadillo}.
 }
 \details{
@@ -30,7 +30,7 @@ The function \code{calc_mad()} calculates the Median Absolute
 \examples{
 \dontrun{
 # Calculate VTI returns
-re_turns <- na.omit(rutils::etf_env$re_turns[ ,"VTI", drop=FALSE])
+re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI", drop=FALSE])
 # Compare calc_mad() with stats::mad()
 all.equal(drop(NPE::calc_mad(re_turns)), 
   mad(re_turns)/1.4826)

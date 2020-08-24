@@ -506,12 +506,12 @@ NumericVector ts_proc(arma::vec vector_x, arma::vec vector_y) {
 //' install.packages("WRS", repos="http://R-Forge.R-project.org")
 //' # Compare theilSenEstimator() with WRS::tsreg()
 //' all.equal(NPE::theilSenEstimator(vector_x, vector_y), 
-//'   WRS::tsreg(vector_x, vector_y), check.attributes=FALSE)
+//'   WRS::tsreg(vector_x, vector_y, FALSE), check.attributes=FALSE)
 //' # Compare the speed of RcppParallel with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
 //'   Rcpp=NPE::theilSenEstimator(vector_x, vector_y),
-//'   Rcode=WRS::tsreg(vector_x, vector_y),
+//'   Rcode=WRS::tsreg(vector_x, vector_y, FALSE),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -525,7 +525,7 @@ NumericVector theilSenEstimator(arma::vec x, arma::vec y) {
   coef[1] = med_ian(v1v2);
   
   // Intercept
-  coef[0] = med_ian(y - coef[1] * x);
+  coef[0] = med_ian(y) - coef[1] *med_ian(x);
   return coef;
 }  // end theilSenEstimator
 

@@ -28,16 +28,16 @@ The function \code{hle()} calculates the Hodges-Lehmann estimator of
 }
 \examples{
 \dontrun{
-# Create a vector of random returns
-re_turns <- rnorm(1e6)
+# Calculate VTI returns
+re_turns <- zoo::coredata(na.omit(NPE::etf_env$re_turns[ ,"VTI"]))
 # Compare hle() with wilcox.test()
-all.equal(drop(NPE::hle(re_turns)), 
-  wilcox.test(re_turns, conf.int = TRUE))
+all.equal(wilcox.test(re_turns, conf.int = TRUE)$estimate, 
+  drop(NPE::hle(re_turns)), check.attributes=FALSE)
 # Compare the speed of RcppParallel with R code
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=NPE::hle(re_turns),
-  rcode=wilcox.test(re_turns, conf.int = TRUE),
+  Rcpp=NPE::hle(re_turns),
+  Rcode=wilcox.test(re_turns, conf.int = TRUE),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 
