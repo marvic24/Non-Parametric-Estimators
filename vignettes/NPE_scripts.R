@@ -149,13 +149,13 @@ x <- runif(10)
 y <- runif(10)
 
 library("WRS")
-tsreg(x, y)$coef    # there is very small difference in intercept because WRS package adjusts it for residuals and I don't.
+tsreg(x, y, FALSE)$coef    # there is very small difference in intercept because WRS package adjusts it for residuals and I don't.
 TheilSenEstimator(x, y)
 
 
 summary(microbenchmark(
   Rcpp=TheilSenEstimator(x, y),
-  Rcode=tsreg(x, y)$coef,
+  Rcode=tsreg(x, y, FALSE)$coef,
   times=10))[, c(1, 4, 5)] 
 
 
