@@ -244,15 +244,27 @@ struct parallel_rolling_mad : public Worker
 //'   
 //' @examples
 //' \dontrun{
-//' # Create a vector of random returns
-//' re_turns <- rnorm(1e6)
-//' rolling_mad(re_turns)
+//' # Calculate VTI returns
+//' re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI"])
+//' # Define R function for the rolling MAD
+//' rolling_madr <- function(x, look_back) {
+//'   sapply(1:NROW(x), function(i) {
+//'     NPE::calc_mad(x[max(1, i-look_back+1):i, ])
+//'   })  # end sapply
+//' }  # end rolling_madr
+//' # Compare rolling_mad() with R code
+//' all.equal(drop(NPE::rolling_mad(re_turns, 11))[-(1:10)],
+//'   rolling_madr(re_turns, 11)[-(1:10)], check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' summary(microbenchmark(
+//'   parallel_Rcpp=NPE::rolling_mad(re_turns, 11),
+//'   Rcode=rolling_madr(re_turns, 11),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec rolling_mad(NumericVector vec_tor, int look_back)
-{
+arma::vec rolling_mad(NumericVector vec_tor, int look_back) {
   int n = vec_tor.size();
   arma::vec results(n);
   
@@ -262,6 +274,7 @@ arma::vec rolling_mad(NumericVector vec_tor, int look_back)
   parallelFor(1, vec_tor.length(), ma_d);
   
   return results;
+  
 }  // end rolling_mad
 
 
@@ -326,12 +339,12 @@ skew_type calc_skew_type(const std::string& typ_e) {
 //'   x <- (x-mean(x)); nr <- NROW(x);
 //'   nr*sum(x^3)/(var(x))^1.5/(nr-1)/(nr-2)
 //' }  # end calc_skewr
-//' all.equal(NPE::calc_skew(re_turns), 
+//' all.equal(NPE::calc_skew(re_turns, typ_e = "pearson"), 
 //'   calc_skewr(re_turns), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=NPE::calc_skew(re_turns),
+//'   Rcpp=NPE::calc_skew(re_turns, typ_e = "pearson"),
 //'   Rcode=calc_skewr(re_turns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' # Calculate the quantile skewness
@@ -396,10 +409,9 @@ arma::mat calc_skew(arma::mat t_series,
 
 
 
-
 ////////////////////////////////////////////////////////////
-//' Worker function for calculating skewness of the colums of time series over rolling window
-//' by using parallel processing.
+//' Worker function for calculating skewness of the colums of time series over
+//' rolling window by using parallel processing.
 
 // Define structure 
 struct parallel_rolling_skew : public Worker{
@@ -425,7 +437,7 @@ struct parallel_rolling_skew : public Worker{
   
   // convert RVector/RMatrix into arma type for Rcpp function (NPE::calc_skew)
   // and the follwing arma data will be shared in parallel computing
-  arma::mat convert(){
+  arma::mat convert() {
     
     RMatrix<double> tmp_mat = mat_rix;
     arma::mat MAT(tmp_mat.begin(), tmp_mat.nrow(), tmp_mat.ncol(), false);
@@ -456,7 +468,8 @@ struct parallel_rolling_skew : public Worker{
 
 ////////////////////////////////////////////////////////////
 //' Calculate the skewness of the columns of a \emph{time series} or a
-//' \emph{matrix} ober rolling window using \code{RcppArmadillo} and \code{RcppParallel}.
+//' \emph{matrix} over a rolling window using \code{RcppArmadillo} and
+//' \code{RcppParallel}.
 //'
 //' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
 //'
@@ -492,15 +505,27 @@ struct parallel_rolling_skew : public Worker{
 //' \dontrun{
 //' # Calculate VTI returns
 //' re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI", drop=FALSE])
-//' # Calculate the Pearson skewness
-//' NPE::rolling_skew(re_turns, 30)
+//' # Define R function for the rolling skew
+//' rolling_skewr <- function(x, look_back) {
+//'   sapply(1:NROW(x), function(i) {
+//'     NPE::calc_skew(x[max(1, i-look_back+1):i, ])
+//'   })  # end sapply
+//' }  # end rolling_skewr
+//' # Compare rolling_skew() with R code
+//' all.equal(drop(NPE::rolling_skew(re_turns, 11))[-(1:10)],
+//'   rolling_skewr(re_turns, 11)[-(1:10)], check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' summary(microbenchmark(
+//'   parallel_Rcpp=NPE::rolling_skew(re_turns, 11),
+//'   Rcode=rolling_skewr(re_turns, 11),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' 
 //' @export
 // [[Rcpp::export]]
 arma::vec rolling_skew(NumericMatrix t_series, 
                        int look_back,
                        std::string typ_e = "pearson", 
-                       double al_pha = 0.25){
+                       double al_pha = 0.25) {
   
   arma::mat results(t_series.nrow(), t_series.ncol());
   
@@ -529,10 +554,10 @@ struct pair_averages : public Worker
   arma::vec& ave_rages;
   
   // Constructor
-  pair_averages(const NumericVector vec_tor, arma::vec& ave_rages) : vec_tor(vec_tor), ave_rages(ave_rages){ n = vec_tor.size();}
+  pair_averages(const NumericVector vec_tor, arma::vec& ave_rages) : vec_tor(vec_tor), ave_rages(ave_rages) { n = vec_tor.size();}
   
   // Parallel Function Operator
-  void operator()(std::size_t begin_index, std::size_t end_index){
+  void operator()(std::size_t begin_index, std::size_t end_index) {
 
     for (std::size_t i = begin_index; i < (end_index); i++) {
       for (std::size_t j = (i+1); j< (size_t)(n); j++) {
@@ -735,7 +760,7 @@ Out sum(const Container& C) {
 
 // This computes the weighted median of array A with corresponding weights W.
 
-double wmedian(const std::vector<double>& A, const std::vector<long>& W){
+double wmedian(const std::vector<double>& A, const std::vector<long>& W) {
   
   typedef pair<double, long> aw_t;
   
@@ -1012,7 +1037,7 @@ double medcouple(const NumericVector X, double eps1, double eps2) {
 //' 
 //' @export
 // [[Rcpp::export]]
-double med_couple(NumericVector x, double eps1 = 1e-14, double eps2 = 1e-15){
+double med_couple(NumericVector x, double eps1 = 1e-14, double eps2 = 1e-15) {
   
   return medcouple(x, eps1, eps2);
   

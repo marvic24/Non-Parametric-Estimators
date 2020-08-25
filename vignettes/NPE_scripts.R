@@ -29,14 +29,13 @@ system("R CMD Rd2pdf C:/Develop/capstone/Sumit_Sethi/NPE")
 ## Tests for function NPE::med_ian()
 
 # Calculate XLF returns
-re_turns <- na.omit(rutils::etf_env$re_turns[ ,"XLF", drop=FALSE])
+re_turns <- na.omit(NPE::etf_env$re_turns[ ,"XLF", drop=FALSE])
 n_rows <- NROW(re_turns)
 
 
-# The function NPE::med_ian() calculates the median
-# da_ta <- rnorm(1e4)
-all.equal(median(re_turns), NPE::med_ian(re_turns), check.attributes=FALSE)
+## Benchmark NPE::med_ian() for the median
 
+all.equal(NPE::med_ian(re_turns), median(re_turns), check.attributes=FALSE)
 # NPE::med_ian() is a little faster than stats::median()
 library(microbenchmark)
 summary(microbenchmark(
@@ -45,74 +44,113 @@ summary(microbenchmark(
   times=10))[, c(1, 4, 5)]
 
 
-# Benchmark the Median Absolute Deviation - Rcpp code vs R code.
+## Benchmark NPE::calc_mad() for the Median Absolute Deviation
+
+all.equal(drop(NPE::calc_mad(re_turns)), mad(re_turns)/1.4826, check.attributes=FALSE)
 summary(microbenchmark(
   Rcpp=NPE::calc_mad(re_turns),
   Rcode=mad(re_turns),
   times=10))[, c(1, 4, 5)]
 
 
-## Tests for function NPE::calc_skew()
+## Benchmark NPE::calc_skew() for the skewness
 
-# The function NPE::calc_skew() calculates the skewness
-
+# Define R function for the Pearson skewness
 calc_skewr <- function(x) {
   x <- (x-mean(x)); nr <- NROW(x);
   nr*sum(x^3)/(var(x))^1.5/(nr-1)/(nr-2)
 }  # end calc_skewr
 
-all.equal(calc_skewr(re_turns), calc_skew(re_turns), check.attributes=FALSE)
-
-skew_ness <- sapply(rutils::etf_env$sym_bols, function(sym_bol) {
-  calc_skew(na.omit(get(sym_bol, rutils::etf_env$re_turns)))
-})  # end sapply
-
-foo <- sapply(rutils::etf_env$sym_bols, function(sym_bol) {
-  calc_skewnp(na.omit(get(sym_bol, rutils::etf_env$re_turns)))
-})  # end sapply
-bar <- sapply(rutils::etf_env$sym_bols, function(sym_bol) {
-  calc_mad(na.omit(get(sym_bol, rutils::etf_env$re_turns)))
-})  # end sapply
-foo <- foo/bar
-plot(skew_ness[c(-12, -16)], foo[c(-12, -16)])
-
+all.equal(NPE::calc_skew(re_turns, typ_e = "pearson"), 
+          calc_skewr(re_turns), check.attributes=FALSE)
 
 summary(microbenchmark(
-  Rcpp=calc_skew(re_turns),
+  Rcpp=calc_skew(re_turns, typ_e = "pearson"),
   Rcode=calc_skewr(re_turns),
   times=10))[, c(1, 4, 5)]
 
 
-## Benchmark for rolling median
+## Plot scatterplot of Nonparametric skewness versus Pearson skewness
+# Calculate the Pearson skewness of ETF returns
+skew_ness <- sapply(NPE::etf_env$re_turns, function(re_turns) {
+  NPE::calc_skew(na.omit(re_turns), typ_e = "pearson")
+})  # end sapply
+
+# Calculate the Nonparametric skewness of ETF returns
+skewness_np <- sapply(NPE::etf_env$re_turns, function(re_turns) {
+  NPE::calc_skew(na.omit(re_turns), typ_e = "nonparametric")
+})  # end sapply
+# Scale the Nonparametric skewness by the MAD
+ma_d <- sapply(NPE::etf_env$re_turns, function(re_turns) {
+  NPE::calc_mad(na.omit(re_turns))
+})  # end sapply
+skewness_np <- skewness_np/ma_d
+# Plot scatterplot without SVXY and VXX
+se_lect <- match(c("SVXY", "VXX"), names(skew_ness))
+x11()
+plot(x=skew_ness[-se_lect], y=skewness_np[-se_lect],
+     xlab="Pearson skewness", ylab="Nonparametric skewness")
+
+
+## Benchmark NPE::rolling_median() for the rolling median
+
 # The function NPE::rolling_median() calculates the rolling median,
 # the same as roll::roll_median().
-all.equal(drop(NPE::rolling_median(re_turns, look_back=11))[-(1:10)],
-          roll::roll_median(re_turns, width=11)[-(1:10)], check.attributes=FALSE)
+all.equal(NPE::rolling_median(re_turns, look_back=11)[-(1:10)],
+          zoo::coredata(roll::roll_median(re_turns, width=11))[-(1:10)], 
+          check.attributes=FALSE)
 
 # NPE::rolling_median() is about as fast as roll::roll_median().
 summary(microbenchmark(
   parallel_Rcpp=NPE::rolling_median(re_turns, look_back=11),
-  Rcpp=roll::roll_median(re_turns, width=11),
+  roll=roll::roll_median(re_turns, width=11),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 
 
 
-# Benchmark for calculating rolling median. We are benchmarking this function against function "roll_median"
-# (Also written in Rcpp) offered by library "roll". We are bit faster than this function due to 
-# multithreaded approach.
+
+## Benchmark of NPE::rolling_mad() for the rolling MAD
+
+# Define R function for the rolling MAD
+rolling_madr <- function(x, look_back) {
+  sapply(1:NROW(x), function(i) {
+    NPE::calc_mad(x[max(1, i-look_back+1):i, ])
+  })  # end sapply
+}  # end rolling_madr
+
+foo <- rolling_madr(re_turns, 11)
+bar <- drop(NPE::rolling_mad(re_turns, 11))
+all.equal(drop(NPE::rolling_mad(re_turns, 11))[-(1:10)],
+          rolling_madr(re_turns, 11)[-(1:10)], 
+          check.attributes=FALSE)
 
 summary(microbenchmark(
-  Rcpp=rolling_median(re_turns, 30),
-  roll_library=roll_median(re_turns, 30),
-  times=10))[, c(1, 4, 5)]  
+  parallel_Rcpp=NPE::rolling_mad(re_turns, 11),
+  Rcode=rolling_madr(re_turns, 11),
+  times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 
 
 
-# Multi-Threaded function for calculating median absolute function over rolling window
-rolling_mad(re_turns, 7)
+## Benchmark of NPE::rolling_skew() for the rolling skew
 
+# Define R function for the rolling skew
+rolling_skewr <- function(x, look_back) {
+  sapply(1:NROW(x), function(i) {
+    NPE::calc_skew(x[max(1, i-look_back+1):i, ])
+  })  # end sapply
+}  # end rolling_skewr
 
-x <- runif(n = 10, min = -100000, max = 100000)
+foo <- rolling_skewr(re_turns, 11)
+bar <- drop(NPE::rolling_skew(re_turns, 11))
+all.equal(drop(NPE::rolling_skew(re_turns, 11))[-(1:10)],
+          rolling_skewr(re_turns, 11)[-(1:10)], 
+          check.attributes=FALSE)
+
+summary(microbenchmark(
+  parallel_Rcpp=NPE::rolling_skew(re_turns, 11),
+  Rcode=rolling_skewr(re_turns, 11),
+  times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+
 
 
 # Benchmark the medcouple
