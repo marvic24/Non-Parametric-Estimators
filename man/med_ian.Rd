@@ -24,16 +24,16 @@ The function \code{med_ian()} calculates the median of the
 }
 \examples{
 \dontrun{
-# Create a vector of random returns
-re_turns <- rnorm(1e6)
+# Calculate VTI returns
+re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI"])
 # Compare med_ian() with median()
 all.equal(drop(NPE::med_ian(re_turns)), 
   median(re_turns))
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=NPE::med_ian(re_turns),
-  rcode=median(re_turns),
+  Rcpp=NPE::med_ian(re_turns),
+  Rcode=median(re_turns),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

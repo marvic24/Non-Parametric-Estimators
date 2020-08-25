@@ -11,24 +11,29 @@ calc_pca(mat_rix)
 \item{\code{mat_rix}}{A \emph{matrix} or a \emph{time series}.}
 }
 \value{
-A \emph{matrix} of variable loadings (i.e. a matrix whose columns contain
-  the eigenvectors).
+A \emph{matrix} of variable loadings (i.e. a matrix whose columns
+  contain the eigenvectors).
 }
 \description{
 Performs a principal component analysis on given \emph{matrix} or \emph{time
 series} using \code{RcppArmadillo}.
 }
 \details{
-The function \code{calc_pca()} performs a principal component analysis
-   on a \emph{matrix} using \code{RcppArmadillo}.
+The function \code{calc_pca()} performs a principal component
+  analysis on a \emph{matrix} using \code{RcppArmadillo}.
 }
 \examples{
 \dontrun{
-# Create a matrix of random returns
-re_turns <- matrix(rnorm(5e6), nc=5)
+
+# Select all the ETF symbols except "VXX" and "SVXY"
+sym_bols <- NPE::etf_env$sym_bols
+sym_bols <- sym_bols[!(sym_bols \%in\% c("VXX", "SVXY"))]
+# Calculate ETF returns
+re_turns <- NPE::etf_env$re_turns[, sym_bols]
+re_turns <- na.omit(re_turns)
 # Compare calc_pca() with standard prcomp()
-all.equal(drop(NPE::calc_pca(re_turns)), 
-  prcomp(re_turns))
+all.equal(NPE::calc_pca(re_turns), 
+  stats::prcomp(re_turns)$rotation, check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(

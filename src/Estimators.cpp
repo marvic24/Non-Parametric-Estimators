@@ -266,6 +266,22 @@ arma::vec rolling_mad(NumericVector vec_tor, int look_back)
 
 
 
+// Switch statement in calc_skew() uses C++ enum type.
+// This is needed because Rcpp can't map C++ enum type to R variable SEXP.
+enum skew_type {Pearson, Quantile, Nonparametric};
+// Map string to C++ enum type for switch statement.
+skew_type calc_skew_type(const std::string& typ_e) {
+  if (typ_e == "Pearson" || typ_e == "pearson" || typ_e == "p") 
+    return skew_type::Pearson;
+  else if (typ_e == "Quantile" || typ_e == "quantile" || typ_e == "q")
+    return skew_type::Quantile;
+  else if (typ_e == "Nonparametric" || typ_e == "nonparametric" || typ_e == "n")
+    return skew_type::Nonparametric;
+  else 
+    return skew_type::Pearson;
+}  // end calc_skew_type
+
+
 
 ////////////////////////////////////////////////////////////
 //' Calculate the skewness of the columns of a \emph{time series} or a
@@ -348,11 +364,12 @@ arma::vec rolling_mad(NumericVector vec_tor, int look_back)
 //' @export
 // [[Rcpp::export]]
 arma::mat calc_skew(arma::mat t_series,
-                    std::string typ_e = "pearson", 
+                    const std::string& typ_e = "pearson", 
                     double al_pha = 0.25) {
+  
   // switch statement for all the different types of skew
-  switch(typ_e[0]) {
-  case 'p' : {  // Pearson
+  switch(calc_skew_type(typ_e)) {
+  case skew_type::Pearson: {  // Pearson
     double num_rows = t_series.n_rows;
     arma::mat mean_s = arma::mean(t_series);
     arma::mat var_s = arma::var(t_series);
@@ -360,12 +377,12 @@ arma::mat calc_skew(arma::mat t_series,
     t_series.each_row() -= mean_s;
     return (num_rows/(num_rows-1)/(num_rows-2))*arma::sum(arma::pow(t_series, 3))/arma::pow(var_s, 1.5);
   }  // end pearson
-  case 'q' : {  // Quantile
+  case skew_type::Quantile: {  // Quantile
     arma::vec prob_s = {al_pha, 0.5, 1.0 - al_pha};
     arma::mat quantile_s = quantile(t_series, prob_s);
     return (quantile_s.row(2) + quantile_s.row(0) - 2*quantile_s.row(1))/(quantile_s.row(2) - quantile_s.row(0));
   }  // end quantile
-  case 'n' : {  // Nonparametric
+  case skew_type::Nonparametric: {  // Nonparametric
     return (arma::mean(t_series) - arma::median(t_series))/arma::stddev(t_series);
   }  // end nonparametric
   default : {
@@ -542,22 +559,27 @@ NumericVector theilSenEstimator(arma::vec x, arma::vec y) {
 ////////////////////////////////////////////////////////////
 //' Performs a principal component analysis on given \emph{matrix} or \emph{time
 //' series} using \code{RcppArmadillo}.
-//' 
+//'
 //' @param \code{mat_rix} A \emph{matrix} or a \emph{time series}.
 //'
-//' @return A \emph{matrix} of variable loadings (i.e. a matrix whose columns contain
-//'   the eigenvectors).
+//' @return A \emph{matrix} of variable loadings (i.e. a matrix whose columns
+//'   contain the eigenvectors).
 //'
-//' @details The function \code{calc_pca()} performs a principal component analysis
-//'    on a \emph{matrix} using \code{RcppArmadillo}. 
+//' @details The function \code{calc_pca()} performs a principal component
+//'   analysis on a \emph{matrix} using \code{RcppArmadillo}.
 //'   
 //' @examples
 //' \dontrun{
-//' # Create a matrix of random returns
-//' re_turns <- matrix(rnorm(5e6), nc=5)
+//' 
+//' # Select all the ETF symbols except "VXX" and "SVXY"
+//' sym_bols <- NPE::etf_env$sym_bols
+//' sym_bols <- sym_bols[!(sym_bols %in% c("VXX", "SVXY"))]
+//' # Calculate ETF returns
+//' re_turns <- NPE::etf_env$re_turns[, sym_bols]
+//' re_turns <- na.omit(re_turns)
 //' # Compare calc_pca() with standard prcomp()
-//' all.equal(drop(NPE::calc_pca(re_turns)), 
-//'   prcomp(re_turns))
+//' all.equal(NPE::calc_pca(re_turns), 
+//'   stats::prcomp(re_turns)$rotation, check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
@@ -856,8 +878,8 @@ double medcouple(const NumericVector X, double eps1, double eps2) {
 //'
 //' @examples
 //' \dontrun{
-//' # Create a vector of random returns
-//' re_turns <- rnorm(1e6)
+//' # Calculate VTI returns
+//' re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI"])
 //' # Compare med_couple() with mc()
 //' all.equal(drop(NPE::med_couple(re_turns)), 
 //'   robustbase::mc(re_turns))

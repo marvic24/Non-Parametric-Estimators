@@ -55,8 +55,8 @@ The function \code{wilcoxanMannWhitneyTest()} carries out the wilcoxan-Mann-Whit
 \examples{
 \dontrun{
 # Create a vector of random data
-x <- round(runif(10), 2)
-y <- round(runif(10), 2)
+x <- round(runif (10), 2)
+y <- round(runif (10), 2)
 # Carry out WMW signed rank test on the elements in two ways
 all.equal(wilcox.test(x, y)$p.value, drop(NPE::wilcoxanMannWhitneyTest(x, y)))
 # Compare the speed of Rcpp and R code

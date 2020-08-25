@@ -2,8 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{theilSenEstimator}
 \alias{theilSenEstimator}
-\title{Calculate the nonparametric Theil-Sen estimator of dependency-covariance for two
-\emph{vectors}  using \code{RcppArmadillo}}
+\title{Calculate the nonparametric Theil-Sen estimator of dependency-covariance for
+two \emph{vectors} using \code{RcppArmadillo}}
 \usage{
 theilSenEstimator(x, y)
 }
@@ -13,29 +13,35 @@ theilSenEstimator(x, y)
 \item{\code{vector_y}}{A \emph{vector} dependent data.}
 }
 \value{
-A column \emph{vector} containing two values i.e intercept and slope
+A column \emph{vector} containing two values i.e intercept and
+  slope.
 }
 \description{
-Calculate the nonparametric Theil-Sen estimator of dependency-covariance for two
-\emph{vectors}  using \code{RcppArmadillo}
+Calculate the nonparametric Theil-Sen estimator of dependency-covariance for
+two \emph{vectors} using \code{RcppArmadillo}
 }
 \details{
 The function \code{theilSenEstimator()} calculates the Theil-Sen
-  estimator of the \emph{vector}, using \code{RcppArmadillo} . The function
+  estimator  using \code{RcppArmadillo}. The function
   \code{theilSenEstimator()} is significantly faster than function
   \code{WRS::tsreg()} in \code{R}.
 }
 \examples{
 \dontrun{
-# Create a vector of random returns
+# Create vectors of random returns
 vector_x <- rnorm(10)
-vactor_y <- rnorm(10)
-# Compare theilSenEstimator() with tsreg()
+vector_y <- rnorm(10)
+# Install package akima and WRS
+install.packages("akima")
+install.packages("WRS", repos="http://R-Forge.R-project.org")
+# Compare theilSenEstimator() with WRS::tsreg()
+all.equal(NPE::theilSenEstimator(vector_x, vector_y), 
+  WRS::tsreg(vector_x, vector_y, FALSE)$coef, check.attributes=FALSE)
 # Compare the speed of RcppParallel with R code
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=NPE::theilSenEstimator(vector_x, vector_y),
-  rcode=WRS(vector_x, vector_y),
+  Rcpp=NPE::theilSenEstimator(vector_x, vector_y),
+  Rcode=WRS::tsreg(vector_x, vector_y, FALSE),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

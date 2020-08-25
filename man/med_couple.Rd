@@ -28,8 +28,8 @@ The function \code{med_couple()} calculates the medcouple of the \emph{vector},
 }
 \examples{
 \dontrun{
-# Create a vector of random returns
-re_turns <- rnorm(1e6)
+# Calculate VTI returns
+re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI"])
 # Compare med_couple() with mc()
 all.equal(drop(NPE::med_couple(re_turns)), 
   robustbase::mc(re_turns))

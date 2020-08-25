@@ -29,9 +29,14 @@ The function \code{hle()} calculates the Hodges-Lehmann estimator of
 \examples{
 \dontrun{
 # Calculate VTI returns
-re_turns <- zoo::coredata(na.omit(NPE::etf_env$re_turns[ ,"VTI"]))
-# Compare hle() with wilcox.test()
+re_turns <- as.numeric(na.omit(NPE::etf_env$re_turns[ ,"VTI"]))
+# Compare hle() with wilcox.test() - equal only approximately
 all.equal(wilcox.test(re_turns, conf.int = TRUE)$estimate, 
+  drop(NPE::hle(re_turns)), check.attributes=FALSE)
+# Install package ICSNP for nonparametric statistics
+install.packages("ICSNP")
+# Compare hle() with ICSNP::hl.loc() - almost equal
+all.equal(ICSNP::hl.loc(re_turns), 
   drop(NPE::hle(re_turns)), check.attributes=FALSE)
 # Compare the speed of RcppParallel with R code
 library(microbenchmark)

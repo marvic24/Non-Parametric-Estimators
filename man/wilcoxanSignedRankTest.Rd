@@ -50,15 +50,15 @@ The function \code{wilcoxanSignedRankTest()} carries out the wilcoxan signed
 \examples{
 \dontrun{
 # Create a vector of random data
-da_ta <- round(runif(7), 2)
+da_ta <- round(runif (7), 2)
 # Carry out wilcoxan signed rank test on the elements in two ways
 all.equal(wilcox.test(da_ta)$p.value, drop(HighFreq::WilcoxanSignedRankTest(da_ta)))
 # Create a time series of random data
-da_ta <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
+da_ta <- xts::xts(runif (7), seq.Date(Sys.Date(), by=1, length.out=7))
 # Calculate the ranks of the elements in two ways
 all.equal(wilcox.test(coredata(da_ta))$p.value, drop(NPE::wilcoxanSignedRankTest(da_ta)))
 # Compare the speed of Rcpp and R code
-da_ta <- runif(10)
+da_ta <- runif (10)
 library(microbenchmark)
 summary(microbenchmark(
   rcpp=wilcoxanSignedRankTest(da_ta),

@@ -240,9 +240,14 @@ calc_skew <- function(t_series, typ_e = "pearson", al_pha = 0.25) {
 #' @examples
 #' \dontrun{
 #' # Calculate VTI returns
-#' re_turns <- zoo::coredata(na.omit(NPE::etf_env$re_turns[ ,"VTI"]))
-#' # Compare hle() with wilcox.test()
+#' re_turns <- as.numeric(na.omit(NPE::etf_env$re_turns[ ,"VTI"]))
+#' # Compare hle() with wilcox.test() - equal only approximately
 #' all.equal(wilcox.test(re_turns, conf.int = TRUE)$estimate, 
+#'   drop(NPE::hle(re_turns)), check.attributes=FALSE)
+#' # Install package ICSNP for nonparametric statistics
+#' install.packages("ICSNP")
+#' # Compare hle() with ICSNP::hl.loc() - almost equal
+#' all.equal(ICSNP::hl.loc(re_turns), 
 #'   drop(NPE::hle(re_turns)), check.attributes=FALSE)
 #' # Compare the speed of RcppParallel with R code
 #' library(microbenchmark)
@@ -258,15 +263,16 @@ hle <- function(vec_tor) {
 }
 
 #' Calculate the nonparametric Theil-Sen estimator of dependency-covariance for
-#' two \emph{vectors}  using \code{RcppArmadillo}
+#' two \emph{vectors} using \code{RcppArmadillo}
 #'
 #' @param \code{vector_x} A \emph{vector} independent (explanatory) data.
 #' @param \code{vector_y} A \emph{vector} dependent data.
 #'
-#' @return A column \emph{vector} containing two values i.e intercept and slope
+#' @return A column \emph{vector} containing two values i.e intercept and
+#'   slope.
 #'
 #' @details The function \code{theilSenEstimator()} calculates the Theil-Sen
-#'   estimator of the \emph{vector}, using \code{RcppArmadillo} . The function
+#'   estimator  using \code{RcppArmadillo}. The function
 #'   \code{theilSenEstimator()} is significantly faster than function
 #'   \code{WRS::tsreg()} in \code{R}.
 #'
@@ -280,7 +286,7 @@ hle <- function(vec_tor) {
 #' install.packages("WRS", repos="http://R-Forge.R-project.org")
 #' # Compare theilSenEstimator() with WRS::tsreg()
 #' all.equal(NPE::theilSenEstimator(vector_x, vector_y), 
-#'   WRS::tsreg(vector_x, vector_y, FALSE), check.attributes=FALSE)
+#'   WRS::tsreg(vector_x, vector_y, FALSE)$coef, check.attributes=FALSE)
 #' # Compare the speed of RcppParallel with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
@@ -296,22 +302,27 @@ theilSenEstimator <- function(x, y) {
 
 #' Performs a principal component analysis on given \emph{matrix} or \emph{time
 #' series} using \code{RcppArmadillo}.
-#' 
+#'
 #' @param \code{mat_rix} A \emph{matrix} or a \emph{time series}.
 #'
-#' @return A \emph{matrix} of variable loadings (i.e. a matrix whose columns contain
-#'   the eigenvectors).
+#' @return A \emph{matrix} of variable loadings (i.e. a matrix whose columns
+#'   contain the eigenvectors).
 #'
-#' @details The function \code{calc_pca()} performs a principal component analysis
-#'    on a \emph{matrix} using \code{RcppArmadillo}. 
+#' @details The function \code{calc_pca()} performs a principal component
+#'   analysis on a \emph{matrix} using \code{RcppArmadillo}.
 #'   
 #' @examples
 #' \dontrun{
-#' # Create a matrix of random returns
-#' re_turns <- matrix(rnorm(5e6), nc=5)
+#' 
+#' # Select all the ETF symbols except "VXX" and "SVXY"
+#' sym_bols <- NPE::etf_env$sym_bols
+#' sym_bols <- sym_bols[!(sym_bols %in% c("VXX", "SVXY"))]
+#' # Calculate ETF returns
+#' re_turns <- NPE::etf_env$re_turns[, sym_bols]
+#' re_turns <- na.omit(re_turns)
 #' # Compare calc_pca() with standard prcomp()
-#' all.equal(drop(NPE::calc_pca(re_turns)), 
-#'   prcomp(re_turns))
+#' all.equal(NPE::calc_pca(re_turns), 
+#'   stats::prcomp(re_turns)$rotation, check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
@@ -341,8 +352,8 @@ calc_pca <- function(mat_rix) {
 #'
 #' @examples
 #' \dontrun{
-#' # Create a vector of random returns
-#' re_turns <- rnorm(1e6)
+#' # Calculate VTI returns
+#' re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI"])
 #' # Compare med_couple() with mc()
 #' all.equal(drop(NPE::med_couple(re_turns)), 
 #'   robustbase::mc(re_turns))
@@ -359,43 +370,43 @@ med_couple <- function(x, eps1 = 1e-14, eps2 = 1e-15) {
     .Call(`_NPE_med_couple`, x, eps1, eps2)
 }
 
-#'This is an overload of a function \code{calc_ranksWithTies()}, which returns ranks of
-#'the \emph{vector} or a single column \emph{time-series}. It also returns a \code{boolean}
-#'variable indicating if there are ties in the data or not.
-#'There is a function for calculating ranks in rcpp::armadillo, but it doesn't handle ties!
+#' This is an overload of a function \code{calc_ranksWithTies()}, which returns ranks of
+#' the \emph{vector} or a single column \emph{time-series}. It also returns a \code{boolean}
+#' variable indicating if there are ties in the data or not.
+#' There is a function for calculating ranks in rcpp::armadillo, but it doesn't handle ties!
 NULL
 
-#'This function calculates the p values using normal approximation in case 
-#'1. exact calculation is not requested and sample size is greater than 50.
-#'2. There are ties in the data.
+#' This function calculates the p values using normal approximation in case 
+#' 1. exact calculation is not requested and sample size is greater than 50.
+#' 2. There are ties in the data.
 NULL
 
 #' Calculate the ranks of the elements of a \emph{vector} or a single-column
 #' \emph{time series} using \code{RcppArmadillo} and \code{boost}.
 #' 
 #' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
-#'
+#' 
 #' @return A \emph{double vector} with the ranks of the elements of the
 #'   \emph{vector}.
-#'
+#' 
 #' @details The function \code{calc_ranks()} calculates the ranks of the
 #'   elements of a \emph{vector} or a single-column \emph{time series}.
 #'   It \emph{averages} the ranks in case fo ties.
 #'   It uses the \code{boost} function \code{boost::sort::parallel_stable_sort}
 #'   for sorting array in parallel fashion.
-#'
+#' 
 #' @examples
 #' \dontrun{
 #' # Create a vector of random data
-#' da_ta <- round(runif(7), 2)
+#' da_ta <- round(runif (7), 2)
 #' # Calculate the ranks of the elements in two ways
 #' all.equal(rank(da_ta), drop(NPE::calc_ranksWithTies(da_ta)))
 #' # Create a time series of random data
-#' da_ta <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
+#' da_ta <- xts::xts(runif (7), seq.Date(Sys.Date(), by=1, length.out=7))
 #' # Calculate the ranks of the elements in two ways
 #' all.equal(rank(coredata(da_ta)), drop(NPE::calc_ranksWithTies(da_ta)))
 #' # Compare the speed of this function with RcppArmadillo and R code
-#' da_ta <- runif(7)
+#' da_ta <- runif (7)
 #' library(microbenchmark)
 #' summary(microbenchmark(
 #'   rcpp=calc_ranks(da_ta),
@@ -426,27 +437,27 @@ calc_ranksWithTies <- function(vec_tor) {
 #' @param \code{exact} A {boolean} indicating whether an exact p-value should be computed.
 #' @param \code{correct} A {boolean} indicating whether to apply continuity correction
 #'   in normal approximation for the p-value.  
-#'
+#' 
 #' @return A \emph{double} indicating p-value of the test.
-#'
+#' 
 #' @details The function \code{wilcoxanSignedRankTest()} carries out the wilcoxan signed 
 #'   rank test on \emph{vec_tor} and returns the \emph{p-value} of the test.
 #'   By default (if \code{exact} is not specified), an exact p-value is computed if sample 
 #'   contains less than 50 finite values and there are no ties. Otherwise, a normal approximation
 #'   is used.
-#'
+#' 
 #' @examples
 #' \dontrun{
 #' # Create a vector of random data
-#' da_ta <- round(runif(7), 2)
+#' da_ta <- round(runif (7), 2)
 #' # Carry out wilcoxan signed rank test on the elements in two ways
 #' all.equal(wilcox.test(da_ta)$p.value, drop(HighFreq::WilcoxanSignedRankTest(da_ta)))
 #' # Create a time series of random data
-#' da_ta <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
+#' da_ta <- xts::xts(runif (7), seq.Date(Sys.Date(), by=1, length.out=7))
 #' # Calculate the ranks of the elements in two ways
 #' all.equal(wilcox.test(coredata(da_ta))$p.value, drop(NPE::wilcoxanSignedRankTest(da_ta)))
 #' # Compare the speed of Rcpp and R code
-#' da_ta <- runif(10)
+#' da_ta <- runif (10)
 #' library(microbenchmark)
 #' summary(microbenchmark(
 #'   rcpp=wilcoxanSignedRankTest(da_ta),
@@ -478,20 +489,20 @@ wilcoxanSignedRankTest <- function(x, mu = 0, alternative = "two.sided", exact =
 #' @param \code{exact} A {boolean} indicating whether an exact p-value should be computed.
 #' @param \code{correct} A {boolean} indicating whether to apply continuity correction
 #'   in normal approximation for the p-value.  
-#'
+#' 
 #' @return A \emph{double} indicating p-value of the test.
-#'
+#' 
 #' @details The function \code{wilcoxanMannWhitneyTest()} carries out the wilcoxan-Mann-Whitney
 #'   signed rank test on \emph{x} & \emph{y} and returns the \emph{p-value} of the test.
 #'   By default (if \code{exact} is not specified), an exact p-value is computed if sample 
 #'   contains less than 50 finite values and there are no ties. Otherwise, a normal approximation
 #'   is used.
-#'
+#' 
 #' @examples
 #' \dontrun{
 #' # Create a vector of random data
-#' x <- round(runif(10), 2)
-#' y <- round(runif(10), 2)
+#' x <- round(runif (10), 2)
+#' y <- round(runif (10), 2)
 #' # Carry out WMW signed rank test on the elements in two ways
 #' all.equal(wilcox.test(x, y)$p.value, drop(NPE::wilcoxanMannWhitneyTest(x, y)))
 #' # Compare the speed of Rcpp and R code
@@ -512,18 +523,18 @@ wilcoxanMannWhitneyTest <- function(x, y, mu = 0, alternative = "two.sided", exa
 #' @param \code{x} A \emph{List} of numeric data vectors
 #' 
 #' @return A \emph{double} indicating p-value of the test.
-#'
+#' 
 #' @details The function \code{kruskalWalliceTest()} performs a Kruskal-Wallis rank 
 #'   sum test of the null hypothesis that the location parameters of the distribution
 #'   of x are the same in each group. The alternative is that they differ in
 #'   at least in one.
-#'
+#' 
 #' @examples
 #' \dontrun{
 #' x <- c(2.9, 3.0, 2.5, 2.6, 3.2) # normal subjects
 #' y <- c(3.8, 2.7, 4.0, 2.4)      # with obstructive airway disease
 #' z <- c(2.8, 3.4, 3.7, 2.2, 2.0) # with asbestosis
-#'
+#' 
 #' # Carry out Kruskal wallice rank sum test on the elements in two ways
 #' all.equal(kruskal.test(list(x, y, z))$p.value, drop(NPE::kruskalWalliceTest(list(x, y, z))))
 #' # Compare the speed of Rcpp and R code
