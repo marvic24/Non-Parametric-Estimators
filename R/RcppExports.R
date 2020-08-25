@@ -8,6 +8,10 @@ NULL
 #' by using parallel processing.
 NULL
 
+#' Worker function for calculating skewness of the colums of time series over rolling window
+#' by using parallel processing.
+NULL
+
 #' Worker function for calculating pair averages needed for Hodges-Lehmann
 #' estimator by using parallel processing.
 NULL
@@ -221,6 +225,51 @@ rolling_mad <- function(vec_tor, look_back) {
 #' @export
 calc_skew <- function(t_series, typ_e = "pearson", al_pha = 0.25) {
     .Call(`_NPE_calc_skew`, t_series, typ_e, al_pha)
+}
+
+#' Calculate the skewness of the columns of a \emph{time series} or a
+#' \emph{matrix} ober rolling window using \code{RcppArmadillo} and \code{RcppParallel}.
+#'
+#' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
+#'
+#' @param \code{look_back} The length of look back interval.
+#' 
+#' @param \code{typ_e} A \emph{string} specifying the type of skewness (see
+#'   Details). (The default is the \code{typ_e = "pearson"}.)
+#'
+#' @param \code{al_pha} The confidence level for calculating the quantiles.
+#'   (the default is \code{al_pha = 0.25}).
+#'
+#' @return A matrix with the skewness of the columns of
+#'   \code{t_series} over rolling window.
+#'
+#' @details The function \code{rolling_skew()} calculates the skewness of the
+#'   columns of a \emph{time series} or a \emph{matrix} of data using
+#'   \code{RcppArmadillo} and \code{RcppParallel} \code{C++} code.
+#'
+#'   If \code{typ_e = "pearson"} (the default) then \code{calc_skew()}
+#'   calculates the Pearson skewness using the third moment of the data.
+#'
+#'   If \code{typ_e = "quantile"} then it calculates the skewness using the
+#'   differences between the quantiles of the data.
+#'
+#'   If \code{typ_e = "nonparametric"} then it calculates the skewness as the
+#'   difference between the mean of the data minus its median, divided by the
+#'   standard deviation.
+#'   
+#'   The code examples below compare the function \code{rolling_skew()} with the
+#'   skewness calculated using \code{R} code.
+#'
+#' @examples
+#' \dontrun{
+#' # Calculate VTI returns
+#' re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI", drop=FALSE])
+#' # Calculate the Pearson skewness
+#' NPE::rolling_skew(re_turns, 30)
+#' 
+#' @export
+rolling_skew <- function(t_series, look_back, typ_e = "pearson", al_pha = 0.25) {
+    .Call(`_NPE_rolling_skew`, t_series, look_back, typ_e, al_pha)
 }
 
 #' Calculate the nonparametric Hodges-Lehmann estimator of location for a
