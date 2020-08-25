@@ -396,6 +396,125 @@ arma::mat calc_skew(arma::mat t_series,
 
 
 
+
+////////////////////////////////////////////////////////////
+//' Worker function for calculating skewness of the colums of time series over rolling window
+//' by using parallel processing.
+
+// Define structure 
+struct parallel_rolling_skew : public Worker{
+  
+  // input vector 
+  const RMatrix<double> mat_rix;
+  int look_back;
+  std::string typ_e;
+  double al_pha;
+  
+  int n_cols;
+  
+  // Output (pass by reference)
+  arma::mat& sk_ew;
+  
+  
+  // Constructor
+  parallel_rolling_skew(const NumericMatrix mat_rix,
+                        const int look_back,
+                        std::string typ_e,
+                        double al_pha,
+                        arma::mat& sk_ew) : mat_rix(mat_rix), look_back(look_back), typ_e(typ_e), al_pha(al_pha), sk_ew(sk_ew){n_cols = mat_rix.ncol();}
+  
+  // convert RVector/RMatrix into arma type for Rcpp function (NPE::calc_skew)
+  // and the follwing arma data will be shared in parallel computing
+  arma::mat convert(){
+    
+    RMatrix<double> tmp_mat = mat_rix;
+    arma::mat MAT(tmp_mat.begin(), tmp_mat.nrow(), tmp_mat.ncol(), false);
+    return MAT;
+  } // end convert
+  
+  
+  // Parallel function operator
+  void operator()(std::size_t begin, std::size_t end) {
+    
+    for (std::size_t i = begin; i < end; i++) {
+      
+      int start_index = std::max(0, ((int)i-look_back+1));
+      
+      arma::mat mat = convert();
+      arma::mat temp = mat.submat(start_index, 0, (int)(i), n_cols-1);
+      arma::mat res_ult = calc_skew(temp);
+      
+      sk_ew.row(i) = res_ult.row(0);
+      
+    }  // end for
+  }  // end Parallel function operator
+};
+
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the skewness of the columns of a \emph{time series} or a
+//' \emph{matrix} ober rolling window using \code{RcppArmadillo} and \code{RcppParallel}.
+//'
+//' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
+//'
+//' @param \code{look_back} The length of look back interval.
+//' 
+//' @param \code{typ_e} A \emph{string} specifying the type of skewness (see
+//'   Details). (The default is the \code{typ_e = "pearson"}.)
+//'
+//' @param \code{al_pha} The confidence level for calculating the quantiles.
+//'   (the default is \code{al_pha = 0.25}).
+//'
+//' @return A matrix with the skewness of the columns of
+//'   \code{t_series} over rolling window.
+//'
+//' @details The function \code{rolling_skew()} calculates the skewness of the
+//'   columns of a \emph{time series} or a \emph{matrix} of data using
+//'   \code{RcppArmadillo} and \code{RcppParallel} \code{C++} code.
+//'
+//'   If \code{typ_e = "pearson"} (the default) then \code{calc_skew()}
+//'   calculates the Pearson skewness using the third moment of the data.
+//'
+//'   If \code{typ_e = "quantile"} then it calculates the skewness using the
+//'   differences between the quantiles of the data.
+//'
+//'   If \code{typ_e = "nonparametric"} then it calculates the skewness as the
+//'   difference between the mean of the data minus its median, divided by the
+//'   standard deviation.
+//'   
+//'   The code examples below compare the function \code{rolling_skew()} with the
+//'   skewness calculated using \code{R} code.
+//'
+//' @examples
+//' \dontrun{
+//' # Calculate VTI returns
+//' re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI", drop=FALSE])
+//' # Calculate the Pearson skewness
+//' NPE::rolling_skew(re_turns, 30)
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::vec rolling_skew(NumericMatrix t_series, 
+                       int look_back,
+                       std::string typ_e = "pearson", 
+                       double al_pha = 0.25){
+  
+  arma::mat results(t_series.nrow(), t_series.ncol());
+  
+  parallel_rolling_skew sk_ew(t_series, look_back, typ_e, al_pha, results);
+  
+  parallelFor(0, t_series.nrow(), sk_ew);
+  
+  return results;
+} // end rolling_skew
+
+
+
+
+
 ////////////////////////////////////////////////////////////
 //' Worker function for calculating pair averages needed for Hodges-Lehmann
 //' estimator by using parallel processing.
