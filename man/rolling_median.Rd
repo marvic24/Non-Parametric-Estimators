@@ -34,7 +34,7 @@ re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI"])
 # Compare rolling_median() with roll::roll_median()
 all.equal(drop(NPE::rolling_median(re_turns, look_back=11))[-(1:10)], 
   zoo::coredata(roll::roll_median(re_turns, width=11))[-(1:10)])
-# Compare the speed of RcppArmadillo with R code
+# Compare the speed of roll_median) with R code
 library(microbenchmark)
 summary(microbenchmark(
   parallel_rcpp=NPE::rolling_median(re_turns, look_back=11),

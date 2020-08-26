@@ -37,7 +37,7 @@ install.packages("WRS", repos="http://R-Forge.R-project.org")
 # Compare theilSenEstimator() with WRS::tsreg()
 all.equal(NPE::theilSenEstimator(vector_x, vector_y), 
   WRS::tsreg(vector_x, vector_y, FALSE)$coef, check.attributes=FALSE)
-# Compare the speed of RcppParallel with R code
+# Compare the speed of theilSenEstimator() with R code
 library(microbenchmark)
 summary(microbenchmark(
   Rcpp=NPE::theilSenEstimator(vector_x, vector_y),

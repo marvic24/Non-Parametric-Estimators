@@ -29,7 +29,7 @@ re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI"])
 # Compare med_ian() with median()
 all.equal(drop(NPE::med_ian(re_turns)), 
   median(re_turns))
-# Compare the speed of RcppArmadillo with R code
+# Compare the speed of med_ian() with R code
 library(microbenchmark)
 summary(microbenchmark(
   Rcpp=NPE::med_ian(re_turns),

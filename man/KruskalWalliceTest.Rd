@@ -27,13 +27,13 @@ x <- c(2.9, 3.0, 2.5, 2.6, 3.2) # normal subjects
 y <- c(3.8, 2.7, 4.0, 2.4)      # with obstructive airway disease
 z <- c(2.8, 3.4, 3.7, 2.2, 2.0) # with asbestosis
 
-# Carry out Kruskal wallice rank sum test on the elements in two ways
+# Perform Kruskal-Wallis rank sum test on the elements in two ways
 all.equal(kruskal.test(list(x, y, z))$p.value, drop(NPE::kruskalWalliceTest(list(x, y, z))))
 # Compare the speed of Rcpp and R code
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=kruskalWalliceTest(list(x, y, z)),
-  rcode=kruskal.test(list(x, y, z))$p.value,
+  Rcpp=NPE::kruskalWalliceTest(list(x, y, z)),
+  Rcode=kruskal.test(list(x, y, z))$p.value,
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

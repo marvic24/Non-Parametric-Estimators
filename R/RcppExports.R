@@ -16,6 +16,10 @@ NULL
 #' estimator by using parallel processing.
 NULL
 
+#' Worker function for calculating Theil-Sen Estimator over rolling window
+#' by using parallel processing.
+NULL
+
 #' Calculate the median of a  \emph{vector} or a single-column \emph{time
 #' series} using \code{RcppArmadillo}.
 #'
@@ -34,7 +38,7 @@ NULL
 #' # Compare med_ian() with median()
 #' all.equal(drop(NPE::med_ian(re_turns)), 
 #'   median(re_turns))
-#' # Compare the speed of RcppArmadillo with R code
+#' # Compare the speed of med_ian() with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
 #'   Rcpp=NPE::med_ian(re_turns),
@@ -69,7 +73,7 @@ med_ian <- function(vec_tor) {
 #' # Compare rolling_median() with roll::roll_median()
 #' all.equal(drop(NPE::rolling_median(re_turns, look_back=11))[-(1:10)], 
 #'   zoo::coredata(roll::roll_median(re_turns, width=11))[-(1:10)])
-#' # Compare the speed of RcppArmadillo with R code
+#' # Compare the speed of roll_median) with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
 #'   parallel_rcpp=NPE::rolling_median(re_turns, look_back=11),
@@ -105,7 +109,7 @@ rolling_median <- function(vec_tor, look_back) {
 #' # Compare calc_mad() with stats::mad()
 #' all.equal(drop(NPE::calc_mad(re_turns)), 
 #'   mad(re_turns)/1.4826)
-#' # Compare the speed of RcppArmadillo with stats::mad()
+#' # Compare the speed of calc_mad() with stats::mad()
 #' library(microbenchmark)
 #' summary(microbenchmark(
 #'   Rcpp=NPE::calc_mad(re_turns),
@@ -146,7 +150,7 @@ calc_mad <- function(t_series) {
 #' # Compare rolling_mad() with R code
 #' all.equal(drop(NPE::rolling_mad(re_turns, 11))[-(1:10)],
 #'   rolling_madr(re_turns, 11)[-(1:10)], check.attributes=FALSE)
-#' # Compare the speed of RcppArmadillo with R code
+#' # Compare the speed of rolling_mad() with R code
 #' summary(microbenchmark(
 #'   parallel_Rcpp=NPE::rolling_mad(re_turns, 11),
 #'   Rcode=rolling_madr(re_turns, 11),
@@ -202,7 +206,7 @@ rolling_mad <- function(vec_tor, look_back) {
 #' }  # end calc_skewr
 #' all.equal(NPE::calc_skew(re_turns, typ_e = "pearson"), 
 #'   calc_skewr(re_turns), check.attributes=FALSE)
-#' # Compare the speed of RcppArmadillo with R code
+#' # Compare the speed of calc_skew() with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
 #'   Rcpp=NPE::calc_skew(re_turns, typ_e = "pearson"),
@@ -217,7 +221,7 @@ rolling_mad <- function(vec_tor, look_back) {
 #' }  # end calc_skewq
 #' all.equal(drop(NPE::calc_skew(re_turns, typ_e = "quantile")), 
 #'   calc_skewq(re_turns), check.attributes=FALSE)
-#' # Compare the speed of RcppArmadillo with R code
+#' # Compare the speed of calc_skew with R code
 #' summary(microbenchmark(
 #'   Rcpp=NPE::calc_skew(re_turns, typ_e = "quantile"),
 #'   Rcode=calc_skewq(re_turns),
@@ -228,7 +232,7 @@ rolling_mad <- function(vec_tor, look_back) {
 #' all.equal(drop(NPE::calc_skew(re_turns, typ_e = "nonparametric")), 
 #'   (mean(re_turns)-median(re_turns))/sd(re_turns), 
 #'   check.attributes=FALSE)
-#' # Compare the speed of RcppArmadillo with R code
+#' # Compare the speed of calc_skew with R code
 #' summary(microbenchmark(
 #'   Rcpp=NPE::calc_skew(re_turns, typ_e = "nonparametric"),
 #'   Rcode=(mean(re_turns)-median(re_turns))/sd(re_turns),
@@ -287,7 +291,7 @@ calc_skew <- function(t_series, typ_e = "pearson", al_pha = 0.25) {
 #' # Compare rolling_skew() with R code
 #' all.equal(drop(NPE::rolling_skew(re_turns, 11))[-(1:10)],
 #'   rolling_skewr(re_turns, 11)[-(1:10)], check.attributes=FALSE)
-#' # Compare the speed of RcppArmadillo with R code
+#' # Compare the speed of rolling_skew() with R code
 #' summary(microbenchmark(
 #'   parallel_Rcpp=NPE::rolling_skew(re_turns, 11),
 #'   Rcode=rolling_skewr(re_turns, 11),
@@ -324,7 +328,7 @@ rolling_skew <- function(t_series, look_back, typ_e = "pearson", al_pha = 0.25) 
 #' # Compare hle() with ICSNP::hl.loc() - almost equal
 #' all.equal(ICSNP::hl.loc(re_turns), 
 #'   drop(NPE::hle(re_turns)), check.attributes=FALSE)
-#' # Compare the speed of RcppParallel with R code
+#' # Compare the speed of hle() with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
 #'   Rcpp=NPE::hle(re_turns),
@@ -362,7 +366,7 @@ hle <- function(vec_tor) {
 #' # Compare theilSenEstimator() with WRS::tsreg()
 #' all.equal(NPE::theilSenEstimator(vector_x, vector_y), 
 #'   WRS::tsreg(vector_x, vector_y, FALSE)$coef, check.attributes=FALSE)
-#' # Compare the speed of RcppParallel with R code
+#' # Compare the speed of theilSenEstimator() with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
 #'   Rcpp=NPE::theilSenEstimator(vector_x, vector_y),
@@ -373,6 +377,50 @@ hle <- function(vec_tor) {
 #' @export
 theilSenEstimator <- function(x, y) {
     .Call(`_NPE_theilSenEstimator`, x, y)
+}
+
+#' Calculate the nonparametric Theil-Sen estimator of dependency-covariance for
+#' two \emph{vectors} over rolling window using \code{RcppArmadillo} and 
+#' \code{RcppParallel}
+#'
+#' @param \code{vector_x} A \emph{vector} independent (explanatory) data.
+#' @param \code{vector_y} A \emph{vector} dependent data.
+#' @param \code{look_back} The length of look back interval.
+#' 
+#' @return A matrix \emph{matrix} containing two columns values i.e intercept and
+#'   slope.
+#'
+#' @details The function \code{rolling_tse()} calculates the Theil-Sen
+#'   estimator over rolling window using \code{RcppArmadillo} and \code{RcppParallel}.
+#'   The function \code{rolling_tse()} is significantly faster than function
+#'   it's  \code{R} implementation.
+#'
+#' @examples
+#' \dontrun{
+#' # Create vectors of random returns
+#' vector_x <- rnorm(30)
+#' vector_y <- rnorm(30)
+#' # Define R function rolling_theilsenr
+#' rolling_theilsenr <- function(x, y, look_back) {
+#'   sapply(2:NROW(x), function(i) {
+#'      NPE::theilSenEstimator(x[max(1, i-look_back+1):i], y[max(1, i-look_back+1):i])
+#'   })  # end sapply
+#'} 
+#' 
+#' # Compare rolling_theilsen() with rolling_theilsenr
+#'all.equal((NPE::rolling_theilsen(vector_x, vector_y, 5 ))[-(1),], 
+#'          t(rolling_theilsenr(vector_x, vector_y, 5)), check.attributes=FALSE)
+#' # Compare the speed of RcppParallel with R code
+#' library(microbenchmark)
+#' summary(microbenchmark(
+#'   Rcpp=NPE::rolling_theilsen(vector_x, vector_y, 10),
+#'   Rcode=rolling_theilsenr(vector_x, vector_y, 10),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' }
+#' 
+#' @export
+rolling_theilsen <- function(vector_x, vector_y, look_back) {
+    .Call(`_NPE_rolling_theilsen`, vector_x, vector_y, look_back)
 }
 
 #' Performs a principal component analysis on given \emph{matrix} or \emph{time
@@ -398,7 +446,7 @@ theilSenEstimator <- function(x, y) {
 #' # Compare calc_pca() with standard prcomp()
 #' all.equal(NPE::calc_pca(re_turns), 
 #'   stats::prcomp(re_turns)$rotation, check.attributes=FALSE)
-#' # Compare the speed of RcppArmadillo with R code
+#' # Compare the speed of calc_pca() with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
 #'   Rcpp=NPE::calc_pca(re_turns),
@@ -445,10 +493,11 @@ med_couple <- function(x, eps1 = 1e-14, eps2 = 1e-15) {
     .Call(`_NPE_med_couple`, x, eps1, eps2)
 }
 
-#' This is an overload of a function \code{calc_ranksWithTies()}, which returns ranks of
-#' the \emph{vector} or a single column \emph{time-series}. It also returns a \code{boolean}
-#' variable indicating if there are ties in the data or not.
-#' There is a function for calculating ranks in rcpp::armadillo, but it doesn't handle ties!
+#' This is an overload of a function \code{calc_ranksWithTies()}, which returns
+#' ranks of the \emph{vector} or a single column \emph{time-series}. It also
+#' returns a \code{boolean} variable indicating if there are ties in the data
+#' or not. There is a function for calculating ranks in rcpp::armadillo, but it
+#' doesn't handle ties!
 NULL
 
 #' This function calculates the p values using normal approximation in case 
@@ -484,8 +533,8 @@ NULL
 #' da_ta <- runif (7)
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=calc_ranks(da_ta),
-#'   rcode=rank(da_ta),
+#'   Rcpp=calc_ranks(da_ta),
+#'   Rcode=rank(da_ta),
 #'   boost=calc_ranksWithTies(da_ta) 
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
@@ -495,31 +544,33 @@ calc_ranksWithTies <- function(vec_tor) {
     .Call(`_NPE_calc_ranksWithTies`, vec_tor)
 }
 
-#' Performs one sample Wilcoxan ranked sum test on \emph{vector} or a single-column
-#' \emph{time series} using \code{RcppArmadillo} and \code{boost}.
+#' Performs one sample Wilcoxan ranked sum test on \emph{vector} or a
+#' single-column \emph{time series} using \code{RcppArmadillo} and
+#' \code{boost}.
 #' 
 #' @param \code{x} A \emph{vector} or a single-column \emph{time series}.
 #' @param \code{mu} A \emph{double} specifing an optional parameter used 
 #'   to form null hypothesis. Default value is \emph{zero}.
-#' @param \code{alternative} a \emph{character} string specifying the alternative
-#'   hypothesis. It must be one of :
+#' @param \code{alternative} a \emph{character} string specifying the
+#'   alternative hypothesis.  It must be one of:
 #'   \itemize{
 #'     \item "two.sided" two tailed test.
 #'     \item "greater" greater(right) tailed test.
 #'     \item "less" smaller(left) tailed test.
 #'   }
 #'   (The default is \emph{two.sided} test.)
-#' @param \code{exact} A {boolean} indicating whether an exact p-value should be computed.
-#' @param \code{correct} A {boolean} indicating whether to apply continuity correction
-#'   in normal approximation for the p-value.  
+#' @param \code{exact} A {boolean} indicating whether an exact p-value should
+#'   be computed.
+#' @param \code{correct} A {boolean} indicating whether to apply continuity
+#'   correction in normal approximation for the p-value.
 #' 
 #' @return A \emph{double} indicating p-value of the test.
 #' 
-#' @details The function \code{wilcoxanSignedRankTest()} carries out the wilcoxan signed 
-#'   rank test on \emph{vec_tor} and returns the \emph{p-value} of the test.
-#'   By default (if \code{exact} is not specified), an exact p-value is computed if sample 
-#'   contains less than 50 finite values and there are no ties. Otherwise, a normal approximation
-#'   is used.
+#' @details The function \code{wilcoxanSignedRankTest()} carries out the
+#'   wilcoxan signed rank test on \emph{vec_tor} and returns the \emph{p-value}
+#'   of the test. By default (if \code{exact} is not specified), an exact
+#'   p-value is computed if sample contains less than 50 finite values and
+#'   there are no ties. Otherwise, a normal approximation is used.
 #' 
 #' @examples
 #' \dontrun{
@@ -535,8 +586,8 @@ calc_ranksWithTies <- function(vec_tor) {
 #' da_ta <- runif (10)
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=wilcoxanSignedRankTest(da_ta),
-#'   rcode=wilcox.test(da_ta),
+#'   Rcpp=wilcoxanSignedRankTest(da_ta),
+#'   Rcode=wilcox.test(da_ta),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -545,7 +596,7 @@ wilcoxanSignedRankTest <- function(x, mu = 0, alternative = "two.sided", exact =
     .Call(`_NPE_wilcoxanSignedRankTest`, x, mu, alternative, exact, correct)
 }
 
-#' Performs two sample Wilcoxan-Mann-Whitney rank sum test also known as 
+#' Performs two sample Wilcoxan-Mann-Whitney rank sum test also known as
 #' Mann-Whitney U Test on \emph{vector} or a single-column \emph{time series}
 #' using \code{RcppArmadillo} and \code{boost}.
 #' 
@@ -553,24 +604,26 @@ wilcoxanSignedRankTest <- function(x, mu = 0, alternative = "two.sided", exact =
 #' @param \code{y} A \emph{vector} or a single-column \emph{time series}.
 #' @param \code{mu} A \emph{double} specifing an optional parameter used 
 #'   to form null hypothesis. Default value is \emph{zero}.
-#' @param \code{alternative} a \emph{character} string specifying the alternative
-#'   hypothesis. It must be one of :
+#' @param \code{alternative} a \emph{character} string specifying the
+#'   alternative hypothesis.  It must be one of:
 #'   \itemize{
 #'     \item "two.sided" two tailed test.
 #'     \item "greater" greater(right) tailed test.
 #'     \item "less" smaller(left) tailed test.
 #'   }
 #'   (The default is \emph{two.sided} test.)
-#' @param \code{exact} A {boolean} indicating whether an exact p-value should be computed.
-#' @param \code{correct} A {boolean} indicating whether to apply continuity correction
-#'   in normal approximation for the p-value.  
+#' @param \code{exact} A {boolean} indicating whether an exact p-value should
+#'   be computed.
+#' @param \code{correct} A {boolean} indicating whether to apply continuity
+#'   correction in normal approximation for the p-value.
 #' 
 #' @return A \emph{double} indicating p-value of the test.
 #' 
-#' @details The function \code{wilcoxanMannWhitneyTest()} carries out the wilcoxan-Mann-Whitney
-#'   signed rank test on \emph{x} & \emph{y} and returns the \emph{p-value} of the test.
-#'   By default (if \code{exact} is not specified), an exact p-value is computed if sample 
-#'   contains less than 50 finite values and there are no ties. Otherwise, a normal approximation
+#' @details The function \code{wilcoxanMannWhitneyTest()} carries out the
+#'   wilcoxan-Mann-Whitney signed rank test on \emph{x} & \emph{y} and returns
+#'   the \emph{p-value} of the test. By default (if \code{exact} is not
+#'   specified), an exact p-value is computed if sample contains less than 50
+#'   finite values and there are no ties. Otherwise, a normal approximation
 #'   is used.
 #' 
 #' @examples
@@ -583,8 +636,8 @@ wilcoxanSignedRankTest <- function(x, mu = 0, alternative = "two.sided", exact =
 #' # Compare the speed of Rcpp and R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=wilcoxanMannWhitneyTest(x, y),
-#'   rcode=wilcox.test(x, y),
+#'   Rcpp=wilcoxanMannWhitneyTest(x, y),
+#'   Rcode=wilcox.test(x, y),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -610,13 +663,13 @@ wilcoxanMannWhitneyTest <- function(x, y, mu = 0, alternative = "two.sided", exa
 #' y <- c(3.8, 2.7, 4.0, 2.4)      # with obstructive airway disease
 #' z <- c(2.8, 3.4, 3.7, 2.2, 2.0) # with asbestosis
 #' 
-#' # Carry out Kruskal wallice rank sum test on the elements in two ways
+#' # Perform Kruskal-Wallis rank sum test on the elements in two ways
 #' all.equal(kruskal.test(list(x, y, z))$p.value, drop(NPE::kruskalWalliceTest(list(x, y, z))))
 #' # Compare the speed of Rcpp and R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=kruskalWalliceTest(list(x, y, z)),
-#'   rcode=kruskal.test(list(x, y, z))$p.value,
+#'   Rcpp=NPE::kruskalWalliceTest(list(x, y, z)),
+#'   Rcode=kruskal.test(list(x, y, z))$p.value,
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 

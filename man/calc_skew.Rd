@@ -55,7 +55,7 @@ calc_skewr <- function(x) {
 }  # end calc_skewr
 all.equal(NPE::calc_skew(re_turns, typ_e = "pearson"), 
   calc_skewr(re_turns), check.attributes=FALSE)
-# Compare the speed of RcppArmadillo with R code
+# Compare the speed of calc_skew() with R code
 library(microbenchmark)
 summary(microbenchmark(
   Rcpp=NPE::calc_skew(re_turns, typ_e = "pearson"),
@@ -70,7 +70,7 @@ calc_skewq <- function(x) {
 }  # end calc_skewq
 all.equal(drop(NPE::calc_skew(re_turns, typ_e = "quantile")), 
   calc_skewq(re_turns), check.attributes=FALSE)
-# Compare the speed of RcppArmadillo with R code
+# Compare the speed of calc_skew with R code
 summary(microbenchmark(
   Rcpp=NPE::calc_skew(re_turns, typ_e = "quantile"),
   Rcode=calc_skewq(re_turns),
@@ -81,7 +81,7 @@ NPE::calc_skew(re_turns, typ_e = "nonparametric")
 all.equal(drop(NPE::calc_skew(re_turns, typ_e = "nonparametric")), 
   (mean(re_turns)-median(re_turns))/sd(re_turns), 
   check.attributes=FALSE)
-# Compare the speed of RcppArmadillo with R code
+# Compare the speed of calc_skew with R code
 summary(microbenchmark(
   Rcpp=NPE::calc_skew(re_turns, typ_e = "nonparametric"),
   Rcode=(mean(re_turns)-median(re_turns))/sd(re_turns),

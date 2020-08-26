@@ -34,7 +34,7 @@ re_turns <- na.omit(re_turns)
 # Compare calc_pca() with standard prcomp()
 all.equal(NPE::calc_pca(re_turns), 
   stats::prcomp(re_turns)$rotation, check.attributes=FALSE)
-# Compare the speed of RcppArmadillo with R code
+# Compare the speed of calc_pca() with R code
 library(microbenchmark)
 summary(microbenchmark(
   Rcpp=NPE::calc_pca(re_turns),

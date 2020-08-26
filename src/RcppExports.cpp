@@ -66,7 +66,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // rolling_skew
-arma::vec rolling_skew(NumericMatrix t_series, int look_back, std::string typ_e, double al_pha);
+arma::mat rolling_skew(NumericMatrix t_series, int look_back, std::string typ_e, double al_pha);
 RcppExport SEXP _NPE_rolling_skew(SEXP t_seriesSEXP, SEXP look_backSEXP, SEXP typ_eSEXP, SEXP al_phaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -99,6 +99,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::vec >::type x(xSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
     rcpp_result_gen = Rcpp::wrap(theilSenEstimator(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rolling_theilsen
+arma::mat rolling_theilsen(NumericVector vector_x, NumericVector vector_y, int look_back);
+RcppExport SEXP _NPE_rolling_theilsen(SEXP vector_xSEXP, SEXP vector_ySEXP, SEXP look_backSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type vector_x(vector_xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type vector_y(vector_ySEXP);
+    Rcpp::traits::input_parameter< int >::type look_back(look_backSEXP);
+    rcpp_result_gen = Rcpp::wrap(rolling_theilsen(vector_x, vector_y, look_back));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -189,6 +202,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NPE_rolling_skew", (DL_FUNC) &_NPE_rolling_skew, 4},
     {"_NPE_hle", (DL_FUNC) &_NPE_hle, 1},
     {"_NPE_theilSenEstimator", (DL_FUNC) &_NPE_theilSenEstimator, 2},
+    {"_NPE_rolling_theilsen", (DL_FUNC) &_NPE_rolling_theilsen, 3},
     {"_NPE_calc_pca", (DL_FUNC) &_NPE_calc_pca, 1},
     {"_NPE_med_couple", (DL_FUNC) &_NPE_med_couple, 3},
     {"_NPE_calc_ranksWithTies", (DL_FUNC) &_NPE_calc_ranksWithTies, 1},

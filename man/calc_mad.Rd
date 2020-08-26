@@ -34,7 +34,7 @@ re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI", drop=FALSE])
 # Compare calc_mad() with stats::mad()
 all.equal(drop(NPE::calc_mad(re_turns)), 
   mad(re_turns)/1.4826)
-# Compare the speed of RcppArmadillo with stats::mad()
+# Compare the speed of calc_mad() with stats::mad()
 library(microbenchmark)
 summary(microbenchmark(
   Rcpp=NPE::calc_mad(re_turns),

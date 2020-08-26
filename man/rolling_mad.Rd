@@ -41,7 +41,7 @@ rolling_madr <- function(x, look_back) {
 # Compare rolling_mad() with R code
 all.equal(drop(NPE::rolling_mad(re_turns, 11))[-(1:10)],
   rolling_madr(re_turns, 11)[-(1:10)], check.attributes=FALSE)
-# Compare the speed of RcppArmadillo with R code
+# Compare the speed of rolling_mad() with R code
 summary(microbenchmark(
   parallel_Rcpp=NPE::rolling_mad(re_turns, 11),
   Rcode=rolling_madr(re_turns, 11),

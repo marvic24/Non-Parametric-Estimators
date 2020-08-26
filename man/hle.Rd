@@ -38,7 +38,7 @@ install.packages("ICSNP")
 # Compare hle() with ICSNP::hl.loc() - almost equal
 all.equal(ICSNP::hl.loc(re_turns), 
   drop(NPE::hle(re_turns)), check.attributes=FALSE)
-# Compare the speed of RcppParallel with R code
+# Compare the speed of hle() with R code
 library(microbenchmark)
 summary(microbenchmark(
   Rcpp=NPE::hle(re_turns),

@@ -2,8 +2,9 @@
 % Please edit documentation in R/RcppExports.R
 \name{wilcoxanSignedRankTest}
 \alias{wilcoxanSignedRankTest}
-\title{Performs one sample Wilcoxan ranked sum test on \emph{vector} or a single-column
-\emph{time series} using \code{RcppArmadillo} and \code{boost}.}
+\title{Performs one sample Wilcoxan ranked sum test on \emph{vector} or a
+single-column \emph{time series} using \code{RcppArmadillo} and
+\code{boost}.}
 \usage{
 wilcoxanSignedRankTest(
   x,
@@ -19,8 +20,8 @@ wilcoxanSignedRankTest(
 \item{\code{mu}}{A \emph{double} specifing an optional parameter used 
 to form null hypothesis. Default value is \emph{zero}.}
 
-\item{\code{alternative}}{a \emph{character} string specifying the alternative
-hypothesis. It must be one of :
+\item{\code{alternative}}{a \emph{character} string specifying the
+alternative hypothesis.  It must be one of:
 \itemize{
   \item "two.sided" two tailed test.
   \item "greater" greater(right) tailed test.
@@ -28,24 +29,26 @@ hypothesis. It must be one of :
 }
 (The default is \emph{two.sided} test.)}
 
-\item{\code{exact}}{A {boolean} indicating whether an exact p-value should be computed.}
+\item{\code{exact}}{A {boolean} indicating whether an exact p-value should
+be computed.}
 
-\item{\code{correct}}{A {boolean} indicating whether to apply continuity correction
-in normal approximation for the p-value.}
+\item{\code{correct}}{A {boolean} indicating whether to apply continuity
+correction in normal approximation for the p-value.}
 }
 \value{
 A \emph{double} indicating p-value of the test.
 }
 \description{
-Performs one sample Wilcoxan ranked sum test on \emph{vector} or a single-column
-\emph{time series} using \code{RcppArmadillo} and \code{boost}.
+Performs one sample Wilcoxan ranked sum test on \emph{vector} or a
+single-column \emph{time series} using \code{RcppArmadillo} and
+\code{boost}.
 }
 \details{
-The function \code{wilcoxanSignedRankTest()} carries out the wilcoxan signed 
-  rank test on \emph{vec_tor} and returns the \emph{p-value} of the test.
-  By default (if \code{exact} is not specified), an exact p-value is computed if sample 
-  contains less than 50 finite values and there are no ties. Otherwise, a normal approximation
-  is used.
+The function \code{wilcoxanSignedRankTest()} carries out the
+  wilcoxan signed rank test on \emph{vec_tor} and returns the \emph{p-value}
+  of the test. By default (if \code{exact} is not specified), an exact
+  p-value is computed if sample contains less than 50 finite values and
+  there are no ties. Otherwise, a normal approximation is used.
 }
 \examples{
 \dontrun{
@@ -61,8 +64,8 @@ all.equal(wilcox.test(coredata(da_ta))$p.value, drop(NPE::wilcoxanSignedRankTest
 da_ta <- runif (10)
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=wilcoxanSignedRankTest(da_ta),
-  rcode=wilcox.test(da_ta),
+  Rcpp=wilcoxanSignedRankTest(da_ta),
+  Rcode=wilcox.test(da_ta),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

@@ -537,7 +537,7 @@ struct parallel_rolling_skew : public Worker{
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec rolling_skew(NumericMatrix t_series, 
+arma::mat rolling_skew(NumericMatrix t_series, 
                        int look_back,
                        std::string typ_e = "pearson", 
                        double al_pha = 0.25) {
@@ -714,6 +714,129 @@ NumericVector theilSenEstimator(arma::vec x, arma::vec y) {
   return coef;
   
 }  // end theilSenEstimator
+
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Worker function for calculating Theil-Sen Estimator over rolling window
+//' by using parallel processing.
+
+// Define structure 
+struct parallel_rolling_tse : public Worker
+{
+  // input vector 
+  const RVector<double> vector_x;
+  const RVector<double> vector_y;
+  int look_back;
+  
+  // Output (pass by reference)
+  arma::mat& ts_e;
+  
+  // Constructor
+  parallel_rolling_tse(const NumericVector vector_x,
+                       const NumericVector vector_y,
+                       const int look_back,
+                       arma::mat& ts_e) : vector_x(vector_x), vector_y(vector_y), look_back(look_back), ts_e(ts_e){}
+  
+  
+  // convert RVector/RMatrix into arma type for Rcpp function (NPE::theilSenEstimator)
+  // and the follwing arma data will be shared in parallel computing
+  arma::vec convertx(){
+    
+    RVector<double> tmp_vec = vector_x;
+    arma::vec VEC(tmp_vec.begin(), vector_x.size(), false);
+    return VEC;
+  }// end convertx
+  
+  arma::vec converty(){
+    
+    RVector<double> tmp_vec = vector_y;
+    arma::vec VEC(tmp_vec.begin(), vector_y.size(), false);
+    return VEC;
+  }// end converty
+  
+  
+  // Parallel function operator
+  void operator()(std::size_t begin, std::size_t end) {
+    
+    for (std::size_t i = begin; i < end; i++) {
+      int start_index = std::max(0, ((int)i-look_back+1));
+      
+      arma::vec vec_x = convertx();
+      arma::vec temp_x = vec_x.subvec(start_index, (int)(i));
+      
+      arma::vec vec_y = converty();
+      arma::vec temp_y = vec_y.subvec(start_index, (int)(i));
+      
+      NumericVector temp_res = theilSenEstimator(temp_x, temp_y);
+      
+      ts_e.row(i) = arma::rowvec(temp_res.begin(), temp_res.length());
+    }  // end for
+  }  // end Parallel function operator
+};
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the nonparametric Theil-Sen estimator of dependency-covariance for
+//' two \emph{vectors} over rolling window using \code{RcppArmadillo} and 
+//' \code{RcppParallel}
+//'
+//' @param \code{vector_x} A \emph{vector} independent (explanatory) data.
+//' @param \code{vector_y} A \emph{vector} dependent data.
+//' @param \code{look_back} The length of look back interval.
+//' 
+//' @return A matrix \emph{matrix} containing two columns values i.e intercept and
+//'   slope.
+//'
+//' @details The function \code{rolling_tse()} calculates the Theil-Sen
+//'   estimator over rolling window using \code{RcppArmadillo} and \code{RcppParallel}.
+//'   The function \code{rolling_tse()} is significantly faster than function
+//'   it's  \code{R} implementation.
+//'
+//' @examples
+//' \dontrun{
+//' # Create vectors of random returns
+//' vector_x <- rnorm(30)
+//' vector_y <- rnorm(30)
+//' # Define R function rolling_theilsenr
+//' rolling_theilsenr <- function(x, y, look_back) {
+//'   sapply(2:NROW(x), function(i) {
+//'      NPE::theilSenEstimator(x[max(1, i-look_back+1):i], y[max(1, i-look_back+1):i])
+//'   })  # end sapply
+//'} 
+//' 
+//' # Compare rolling_theilsen() with rolling_theilsenr
+//'all.equal((NPE::rolling_theilsen(vector_x, vector_y, 5 ))[-(1),], 
+//'          t(rolling_theilsenr(vector_x, vector_y, 5)), check.attributes=FALSE)
+//' # Compare the speed of RcppParallel with R code
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcpp=NPE::rolling_theilsen(vector_x, vector_y, 10),
+//'   Rcode=rolling_theilsenr(vector_x, vector_y, 10),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]  
+arma::mat rolling_theilsen(NumericVector vector_x,
+                           NumericVector vector_y,
+                           int look_back) {
+  
+  arma::mat results(vector_x.size(), 2);
+  
+  parallel_rolling_tse ts_e(vector_x, vector_y, look_back, results);
+  
+  arma::rowvec r(2);
+  r.fill(0);
+  results.row(0) = r;
+  parallelFor(1, vector_x.length(), ts_e);
+  
+  return results;
+} // end rolling_theilsen
 
 
 
