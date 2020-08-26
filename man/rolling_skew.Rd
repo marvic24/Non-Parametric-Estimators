@@ -3,7 +3,8 @@
 \name{rolling_skew}
 \alias{rolling_skew}
 \title{Calculate the skewness of the columns of a \emph{time series} or a
-\emph{matrix} ober rolling window using \code{RcppArmadillo} and \code{RcppParallel}.}
+\emph{matrix} over a rolling window using \code{RcppArmadillo} and
+\code{RcppParallel}.}
 \usage{
 rolling_skew(t_series, look_back, typ_e = "pearson", al_pha = 0.25)
 }
@@ -24,7 +25,8 @@ A matrix with the skewness of the columns of
 }
 \description{
 Calculate the skewness of the columns of a \emph{time series} or a
-\emph{matrix} ober rolling window using \code{RcppArmadillo} and \code{RcppParallel}.
+\emph{matrix} over a rolling window using \code{RcppArmadillo} and
+\code{RcppParallel}.
 }
 \details{
 The function \code{rolling_skew()} calculates the skewness of the

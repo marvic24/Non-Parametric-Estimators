@@ -53,12 +53,12 @@ calc_skewr <- function(x) {
   x <- (x-mean(x)); nr <- NROW(x);
   nr*sum(x^3)/(var(x))^1.5/(nr-1)/(nr-2)
 }  # end calc_skewr
-all.equal(NPE::calc_skew(re_turns), 
+all.equal(NPE::calc_skew(re_turns, typ_e = "pearson"), 
   calc_skewr(re_turns), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=NPE::calc_skew(re_turns),
+  Rcpp=NPE::calc_skew(re_turns, typ_e = "pearson"),
   Rcode=calc_skewr(re_turns),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Calculate the quantile skewness

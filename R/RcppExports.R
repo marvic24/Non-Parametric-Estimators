@@ -8,8 +8,8 @@ NULL
 #' by using parallel processing.
 NULL
 
-#' Worker function for calculating skewness of the colums of time series over rolling window
-#' by using parallel processing.
+#' Worker function for calculating skewness of the colums of time series over
+#' rolling window by using parallel processing.
 NULL
 
 #' Worker function for calculating pair averages needed for Hodges-Lehmann
@@ -135,9 +135,22 @@ calc_mad <- function(t_series) {
 #'   
 #' @examples
 #' \dontrun{
-#' # Create a vector of random returns
-#' re_turns <- rnorm(1e6)
-#' rolling_mad(re_turns)
+#' # Calculate VTI returns
+#' re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI"])
+#' # Define R function for the rolling MAD
+#' rolling_madr <- function(x, look_back) {
+#'   sapply(1:NROW(x), function(i) {
+#'     NPE::calc_mad(x[max(1, i-look_back+1):i, ])
+#'   })  # end sapply
+#' }  # end rolling_madr
+#' # Compare rolling_mad() with R code
+#' all.equal(drop(NPE::rolling_mad(re_turns, 11))[-(1:10)],
+#'   rolling_madr(re_turns, 11)[-(1:10)], check.attributes=FALSE)
+#' # Compare the speed of RcppArmadillo with R code
+#' summary(microbenchmark(
+#'   parallel_Rcpp=NPE::rolling_mad(re_turns, 11),
+#'   Rcode=rolling_madr(re_turns, 11),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
@@ -187,12 +200,12 @@ rolling_mad <- function(vec_tor, look_back) {
 #'   x <- (x-mean(x)); nr <- NROW(x);
 #'   nr*sum(x^3)/(var(x))^1.5/(nr-1)/(nr-2)
 #' }  # end calc_skewr
-#' all.equal(NPE::calc_skew(re_turns), 
+#' all.equal(NPE::calc_skew(re_turns, typ_e = "pearson"), 
 #'   calc_skewr(re_turns), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=NPE::calc_skew(re_turns),
+#'   Rcpp=NPE::calc_skew(re_turns, typ_e = "pearson"),
 #'   Rcode=calc_skewr(re_turns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' # Calculate the quantile skewness
@@ -228,7 +241,8 @@ calc_skew <- function(t_series, typ_e = "pearson", al_pha = 0.25) {
 }
 
 #' Calculate the skewness of the columns of a \emph{time series} or a
-#' \emph{matrix} ober rolling window using \code{RcppArmadillo} and \code{RcppParallel}.
+#' \emph{matrix} over a rolling window using \code{RcppArmadillo} and
+#' \code{RcppParallel}.
 #'
 #' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
 #'
@@ -264,8 +278,20 @@ calc_skew <- function(t_series, typ_e = "pearson", al_pha = 0.25) {
 #' \dontrun{
 #' # Calculate VTI returns
 #' re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI", drop=FALSE])
-#' # Calculate the Pearson skewness
-#' NPE::rolling_skew(re_turns, 30)
+#' # Define R function for the rolling skew
+#' rolling_skewr <- function(x, look_back) {
+#'   sapply(1:NROW(x), function(i) {
+#'     NPE::calc_skew(x[max(1, i-look_back+1):i, ])
+#'   })  # end sapply
+#' }  # end rolling_skewr
+#' # Compare rolling_skew() with R code
+#' all.equal(drop(NPE::rolling_skew(re_turns, 11))[-(1:10)],
+#'   rolling_skewr(re_turns, 11)[-(1:10)], check.attributes=FALSE)
+#' # Compare the speed of RcppArmadillo with R code
+#' summary(microbenchmark(
+#'   parallel_Rcpp=NPE::rolling_skew(re_turns, 11),
+#'   Rcode=rolling_skewr(re_turns, 11),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' 
 #' @export
 rolling_skew <- function(t_series, look_back, typ_e = "pearson", al_pha = 0.25) {
