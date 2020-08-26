@@ -36,7 +36,7 @@ using namespace std;
 //' # Compare med_ian() with median()
 //' all.equal(drop(NPE::med_ian(re_turns)), 
 //'   median(re_turns))
-//' # Compare the speed of RcppArmadillo with R code
+//' # Compare the speed of med_ian() with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
 //'   Rcpp=NPE::med_ian(re_turns),
@@ -123,7 +123,7 @@ struct parallel_rolling_median : public Worker
 //' # Compare rolling_median() with roll::roll_median()
 //' all.equal(drop(NPE::rolling_median(re_turns, look_back=11))[-(1:10)], 
 //'   zoo::coredata(roll::roll_median(re_turns, width=11))[-(1:10)])
-//' # Compare the speed of RcppArmadillo with R code
+//' # Compare the speed of roll_median) with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
 //'   parallel_rcpp=NPE::rolling_median(re_turns, look_back=11),
@@ -172,7 +172,7 @@ arma::vec rolling_median(NumericVector vec_tor, int look_back) {
 //' # Compare calc_mad() with stats::mad()
 //' all.equal(drop(NPE::calc_mad(re_turns)), 
 //'   mad(re_turns)/1.4826)
-//' # Compare the speed of RcppArmadillo with stats::mad()
+//' # Compare the speed of calc_mad() with stats::mad()
 //' library(microbenchmark)
 //' summary(microbenchmark(
 //'   Rcpp=NPE::calc_mad(re_turns),
@@ -271,7 +271,7 @@ struct parallel_rolling_mad : public Worker
 //' # Compare rolling_mad() with R code
 //' all.equal(drop(NPE::rolling_mad(re_turns, 11))[-(1:10)],
 //'   rolling_madr(re_turns, 11)[-(1:10)], check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with R code
+//' # Compare the speed of rolling_mad() with R code
 //' summary(microbenchmark(
 //'   parallel_Rcpp=NPE::rolling_mad(re_turns, 11),
 //'   Rcode=rolling_madr(re_turns, 11),
@@ -356,7 +356,7 @@ skew_type calc_skew_type(const std::string& typ_e) {
 //' }  # end calc_skewr
 //' all.equal(NPE::calc_skew(re_turns, typ_e = "pearson"), 
 //'   calc_skewr(re_turns), check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with R code
+//' # Compare the speed of calc_skew() with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
 //'   Rcpp=NPE::calc_skew(re_turns, typ_e = "pearson"),
@@ -371,7 +371,7 @@ skew_type calc_skew_type(const std::string& typ_e) {
 //' }  # end calc_skewq
 //' all.equal(drop(NPE::calc_skew(re_turns, typ_e = "quantile")), 
 //'   calc_skewq(re_turns), check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with R code
+//' # Compare the speed of calc_skew with R code
 //' summary(microbenchmark(
 //'   Rcpp=NPE::calc_skew(re_turns, typ_e = "quantile"),
 //'   Rcode=calc_skewq(re_turns),
@@ -382,7 +382,7 @@ skew_type calc_skew_type(const std::string& typ_e) {
 //' all.equal(drop(NPE::calc_skew(re_turns, typ_e = "nonparametric")), 
 //'   (mean(re_turns)-median(re_turns))/sd(re_turns), 
 //'   check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with R code
+//' # Compare the speed of calc_skew with R code
 //' summary(microbenchmark(
 //'   Rcpp=NPE::calc_skew(re_turns, typ_e = "nonparametric"),
 //'   Rcode=(mean(re_turns)-median(re_turns))/sd(re_turns),
@@ -529,7 +529,7 @@ struct parallel_rolling_skew : public Worker{
 //' # Compare rolling_skew() with R code
 //' all.equal(drop(NPE::rolling_skew(re_turns, 11))[-(1:10)],
 //'   rolling_skewr(re_turns, 11)[-(1:10)], check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with R code
+//' # Compare the speed of rolling_skew() with R code
 //' summary(microbenchmark(
 //'   parallel_Rcpp=NPE::rolling_skew(re_turns, 11),
 //'   Rcode=rolling_skewr(re_turns, 11),
@@ -617,7 +617,7 @@ struct pair_averages : public Worker
 //' # Compare hle() with ICSNP::hl.loc() - almost equal
 //' all.equal(ICSNP::hl.loc(re_turns), 
 //'   drop(NPE::hle(re_turns)), check.attributes=FALSE)
-//' # Compare the speed of RcppParallel with R code
+//' # Compare the speed of hle() with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
 //'   Rcpp=NPE::hle(re_turns),
@@ -689,7 +689,7 @@ NumericVector ts_proc(arma::vec vector_x, arma::vec vector_y) {
 //' # Compare theilSenEstimator() with WRS::tsreg()
 //' all.equal(NPE::theilSenEstimator(vector_x, vector_y), 
 //'   WRS::tsreg(vector_x, vector_y, FALSE)$coef, check.attributes=FALSE)
-//' # Compare the speed of RcppParallel with R code
+//' # Compare the speed of theilSenEstimator() with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
 //'   Rcpp=NPE::theilSenEstimator(vector_x, vector_y),
@@ -739,7 +739,7 @@ NumericVector theilSenEstimator(arma::vec x, arma::vec y) {
 //' # Compare calc_pca() with standard prcomp()
 //' all.equal(NPE::calc_pca(re_turns), 
 //'   stats::prcomp(re_turns)$rotation, check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with R code
+//' # Compare the speed of calc_pca() with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
 //'   Rcpp=NPE::calc_pca(re_turns),

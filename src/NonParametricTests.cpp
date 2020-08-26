@@ -26,10 +26,11 @@ alternatives hash_it(const std::string& alternative) {
 } // end hash_it
 
 
-//' This is an overload of a function \code{calc_ranksWithTies()}, which returns ranks of
-//' the \emph{vector} or a single column \emph{time-series}. It also returns a \code{boolean}
-//' variable indicating if there are ties in the data or not.
-//' There is a function for calculating ranks in rcpp::armadillo, but it doesn't handle ties!
+//' This is an overload of a function \code{calc_ranksWithTies()}, which returns
+//' ranks of the \emph{vector} or a single column \emph{time-series}. It also
+//' returns a \code{boolean} variable indicating if there are ties in the data
+//' or not. There is a function for calculating ranks in rcpp::armadillo, but it
+//' doesn't handle ties!
 
 arma::vec calc_ranksWithTies(const arma::vec& vec_tor, bool &ties) {
   
@@ -103,8 +104,8 @@ arma::vec calc_ranksWithTies(const arma::vec& vec_tor, bool &ties) {
 //' da_ta <- runif (7)
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=calc_ranks(da_ta),
-//'   rcode=rank(da_ta),
+//'   Rcpp=calc_ranks(da_ta),
+//'   Rcode=rank(da_ta),
 //'   boost=calc_ranksWithTies(da_ta) 
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
@@ -173,31 +174,33 @@ double pnorm_approximation(double z,
 
 
 ////////////////////////////////////////////////////////////
-//' Performs one sample Wilcoxan ranked sum test on \emph{vector} or a single-column
-//' \emph{time series} using \code{RcppArmadillo} and \code{boost}.
+//' Performs one sample Wilcoxan ranked sum test on \emph{vector} or a
+//' single-column \emph{time series} using \code{RcppArmadillo} and
+//' \code{boost}.
 //' 
 //' @param \code{x} A \emph{vector} or a single-column \emph{time series}.
 //' @param \code{mu} A \emph{double} specifing an optional parameter used 
 //'   to form null hypothesis. Default value is \emph{zero}.
-//' @param \code{alternative} a \emph{character} string specifying the alternative
-//'   hypothesis. It must be one of :
+//' @param \code{alternative} a \emph{character} string specifying the
+//'   alternative hypothesis.  It must be one of:
 //'   \itemize{
 //'     \item "two.sided" two tailed test.
 //'     \item "greater" greater(right) tailed test.
 //'     \item "less" smaller(left) tailed test.
 //'   }
 //'   (The default is \emph{two.sided} test.)
-//' @param \code{exact} A {boolean} indicating whether an exact p-value should be computed.
-//' @param \code{correct} A {boolean} indicating whether to apply continuity correction
-//'   in normal approximation for the p-value.  
+//' @param \code{exact} A {boolean} indicating whether an exact p-value should
+//'   be computed.
+//' @param \code{correct} A {boolean} indicating whether to apply continuity
+//'   correction in normal approximation for the p-value.
 //' 
 //' @return A \emph{double} indicating p-value of the test.
 //' 
-//' @details The function \code{wilcoxanSignedRankTest()} carries out the wilcoxan signed 
-//'   rank test on \emph{vec_tor} and returns the \emph{p-value} of the test.
-//'   By default (if \code{exact} is not specified), an exact p-value is computed if sample 
-//'   contains less than 50 finite values and there are no ties. Otherwise, a normal approximation
-//'   is used.
+//' @details The function \code{wilcoxanSignedRankTest()} carries out the
+//'   wilcoxan signed rank test on \emph{vec_tor} and returns the \emph{p-value}
+//'   of the test. By default (if \code{exact} is not specified), an exact
+//'   p-value is computed if sample contains less than 50 finite values and
+//'   there are no ties. Otherwise, a normal approximation is used.
 //' 
 //' @examples
 //' \dontrun{
@@ -213,14 +216,18 @@ double pnorm_approximation(double z,
 //' da_ta <- runif (10)
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=wilcoxanSignedRankTest(da_ta),
-//'   rcode=wilcox.test(da_ta),
+//'   Rcpp=wilcoxanSignedRankTest(da_ta),
+//'   Rcode=wilcox.test(da_ta),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-double wilcoxanSignedRankTest(arma::vec& x, const double& mu =0, const std::string& alternative = "two.sided", bool exact = false, const bool correct = true) {
+double wilcoxanSignedRankTest(arma::vec& x, 
+                              const double& mu = 0, 
+                              const std::string& alternative = "two.sided", 
+                              bool exact = false, 
+                              const bool correct = true) {
   
   x = x- mu;
   bool ties = false;
@@ -280,7 +287,7 @@ double wilcoxanSignedRankTest(arma::vec& x, const double& mu =0, const std::stri
 
 
 ////////////////////////////////////////////////////////////
-//' Performs two sample Wilcoxan-Mann-Whitney rank sum test also known as 
+//' Performs two sample Wilcoxan-Mann-Whitney rank sum test also known as
 //' Mann-Whitney U Test on \emph{vector} or a single-column \emph{time series}
 //' using \code{RcppArmadillo} and \code{boost}.
 //' 
@@ -288,24 +295,26 @@ double wilcoxanSignedRankTest(arma::vec& x, const double& mu =0, const std::stri
 //' @param \code{y} A \emph{vector} or a single-column \emph{time series}.
 //' @param \code{mu} A \emph{double} specifing an optional parameter used 
 //'   to form null hypothesis. Default value is \emph{zero}.
-//' @param \code{alternative} a \emph{character} string specifying the alternative
-//'   hypothesis. It must be one of :
+//' @param \code{alternative} a \emph{character} string specifying the
+//'   alternative hypothesis.  It must be one of:
 //'   \itemize{
 //'     \item "two.sided" two tailed test.
 //'     \item "greater" greater(right) tailed test.
 //'     \item "less" smaller(left) tailed test.
 //'   }
 //'   (The default is \emph{two.sided} test.)
-//' @param \code{exact} A {boolean} indicating whether an exact p-value should be computed.
-//' @param \code{correct} A {boolean} indicating whether to apply continuity correction
-//'   in normal approximation for the p-value.  
+//' @param \code{exact} A {boolean} indicating whether an exact p-value should
+//'   be computed.
+//' @param \code{correct} A {boolean} indicating whether to apply continuity
+//'   correction in normal approximation for the p-value.
 //' 
 //' @return A \emph{double} indicating p-value of the test.
 //' 
-//' @details The function \code{wilcoxanMannWhitneyTest()} carries out the wilcoxan-Mann-Whitney
-//'   signed rank test on \emph{x} & \emph{y} and returns the \emph{p-value} of the test.
-//'   By default (if \code{exact} is not specified), an exact p-value is computed if sample 
-//'   contains less than 50 finite values and there are no ties. Otherwise, a normal approximation
+//' @details The function \code{wilcoxanMannWhitneyTest()} carries out the
+//'   wilcoxan-Mann-Whitney signed rank test on \emph{x} & \emph{y} and returns
+//'   the \emph{p-value} of the test. By default (if \code{exact} is not
+//'   specified), an exact p-value is computed if sample contains less than 50
+//'   finite values and there are no ties. Otherwise, a normal approximation
 //'   is used.
 //' 
 //' @examples
@@ -318,14 +327,18 @@ double wilcoxanSignedRankTest(arma::vec& x, const double& mu =0, const std::stri
 //' # Compare the speed of Rcpp and R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=wilcoxanMannWhitneyTest(x, y),
-//'   rcode=wilcox.test(x, y),
+//'   Rcpp=wilcoxanMannWhitneyTest(x, y),
+//'   Rcode=wilcox.test(x, y),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-double wilcoxanMannWhitneyTest(arma::vec& x, const arma::vec& y, const double& mu =0, const std::string& alternative = "two.sided", bool exact = false, const bool correct = true) {
+double wilcoxanMannWhitneyTest(arma::vec& x, const arma::vec& y, 
+                               const double& mu =0, 
+                               const std::string& alternative = "two.sided", 
+                               bool exact = false, 
+                               const bool correct = true) {
   
   x = x-mu;
   arma::vec xy = join_cols(x, y);
@@ -414,13 +427,13 @@ double wilcoxanMannWhitneyTest(arma::vec& x, const arma::vec& y, const double& m
 //' y <- c(3.8, 2.7, 4.0, 2.4)      # with obstructive airway disease
 //' z <- c(2.8, 3.4, 3.7, 2.2, 2.0) # with asbestosis
 //' 
-//' # Carry out Kruskal wallice rank sum test on the elements in two ways
+//' # Perform Kruskal-Wallis rank sum test on the elements in two ways
 //' all.equal(kruskal.test(list(x, y, z))$p.value, drop(NPE::kruskalWalliceTest(list(x, y, z))))
 //' # Compare the speed of Rcpp and R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=kruskalWalliceTest(list(x, y, z)),
-//'   rcode=kruskal.test(list(x, y, z))$p.value,
+//'   Rcpp=NPE::kruskalWalliceTest(list(x, y, z)),
+//'   Rcode=kruskal.test(list(x, y, z))$p.value,
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
