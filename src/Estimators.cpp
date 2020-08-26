@@ -637,6 +637,7 @@ double hle(NumericVector vec_tor) {
   parallelFor(0, vec_tor.length()-1, avera_ges);
 
   return med_ian(pairs);
+  
 }  // end hle
 
 
@@ -655,6 +656,7 @@ NumericVector ts_proc(arma::vec vector_x, arma::vec vector_y) {
       }  // end if
     }  // end for
   }  // end for
+  
   return output;
   
 }  // end ts_proc
@@ -707,8 +709,10 @@ NumericVector theilSenEstimator(arma::vec x, arma::vec y) {
   coef[1] = med_ian(v1v2);
   
   // Intercept
-  coef[0] = med_ian(y) - coef[1] *med_ian(x);
+  coef[0] = med_ian(y) - coef[1]*med_ian(x);
+  
   return coef;
+  
 }  // end theilSenEstimator
 
 
