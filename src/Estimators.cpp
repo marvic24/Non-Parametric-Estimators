@@ -72,17 +72,26 @@ struct parallel_rolling_median : public Worker
                           const int look_back,
                           arma::vec& med_ians) : vec_tor(vec_tor), look_back(look_back), med_ians(med_ians){}
   
+  // convert RVector/RMatrix into arma type for Rcpp function (NPE::calc_skew)
+  // and the follwing arma data will be shared in parallel computing
+  arma::vec convert(){
+    
+    RVector<double> tmp_vec = vec_tor;
+    arma::vec VEC(tmp_vec.begin(), vec_tor.size(), false);
+    return VEC;
+  } // end convert
+  
   //Parallel Function operator
   void operator()(std::size_t begin, std::size_t end) {
     
     for (std::size_t i = begin; i < end; i++) {
-      int start_index = std::max((std::size_t)(0), (i-look_back + 1));
-      arma::vec temp(i-start_index+1);
       
-      for (std::size_t j = start_index; j <= i; j++)
-        temp[j-start_index] = vec_tor[j];
+      int start_index = std::max(0, ((int)i-look_back+1));
       
+      arma::vec vec = convert();
+      arma::vec temp = vec.subvec(start_index, (int)(i));
       med_ians[i] = arma::median(temp);
+      
     }  // end for
   }  // end Parallel Function operator
 };
@@ -130,8 +139,7 @@ arma::vec rolling_median(NumericVector vec_tor, int look_back) {
   
   parallel_rolling_median media_n(vec_tor, look_back, results);
   
-  results[0] = vec_tor[0];
-  parallelFor(1, vec_tor.length(), media_n);
+  parallelFor(0, vec_tor.length(), media_n);
   
   return results;
 }  // end rolling_median
@@ -202,20 +210,28 @@ struct parallel_rolling_mad : public Worker
   
   // Constructor
   parallel_rolling_mad(const NumericVector vec_tor,
-                          const int look_back,
-                          arma::vec& m_ad) : vec_tor(vec_tor), look_back(look_back), m_ad(m_ad){}
+                       const int look_back,
+                       arma::vec& m_ad) : vec_tor(vec_tor), look_back(look_back), m_ad(m_ad){}
+  
+  
+  // convert RVector/RMatrix into arma type for Rcpp function (NPE::calc_skew)
+  // and the follwing arma data will be shared in parallel computing
+  arma::vec convert(){
+    
+    RVector<double> tmp_vec = vec_tor;
+    arma::vec VEC(tmp_vec.begin(), vec_tor.size(), false);
+    return VEC;
+  } // end convert
+  
   
   // Parallel function operator
   void operator()(std::size_t begin, std::size_t end) {
     
     for (std::size_t i = begin; i < end; i++) {
-      int start_index = std::max((std::size_t)(0), (i-look_back+1));
+      int start_index = std::max(0, ((int)i-look_back+1));
       
-      arma::vec temp(i-start_index+1);
-      
-      for (std::size_t j = start_index; j <= i; j++) {
-        temp[j-start_index] = vec_tor[j];
-      }  // end if
+      arma::vec vec = convert();
+      arma::vec temp = vec.subvec(start_index, (int)(i));
       
       m_ad[i] = med_ian(arma::abs(temp - med_ian(temp)));
     }  // end for
@@ -270,8 +286,7 @@ arma::vec rolling_mad(NumericVector vec_tor, int look_back) {
   
   parallel_rolling_mad ma_d(vec_tor, look_back, results);
   
-  results[0] = 0;
-  parallelFor(1, vec_tor.length(), ma_d);
+  parallelFor(0, vec_tor.length(), ma_d);
   
   return results;
   

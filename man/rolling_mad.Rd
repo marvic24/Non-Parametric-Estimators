@@ -30,9 +30,22 @@ The function \code{rolling_mad()} calculates a vector of
 }
 \examples{
 \dontrun{
-# Create a vector of random returns
-re_turns <- rnorm(1e6)
-rolling_mad(re_turns)
+# Calculate VTI returns
+re_turns <- na.omit(NPE::etf_env$re_turns[ ,"VTI"])
+# Define R function for the rolling MAD
+rolling_madr <- function(x, look_back) {
+  sapply(1:NROW(x), function(i) {
+    NPE::calc_mad(x[max(1, i-look_back+1):i, ])
+  })  # end sapply
+}  # end rolling_madr
+# Compare rolling_mad() with R code
+all.equal(drop(NPE::rolling_mad(re_turns, 11))[-(1:10)],
+  rolling_madr(re_turns, 11)[-(1:10)], check.attributes=FALSE)
+# Compare the speed of RcppArmadillo with R code
+summary(microbenchmark(
+  parallel_Rcpp=NPE::rolling_mad(re_turns, 11),
+  Rcode=rolling_madr(re_turns, 11),
+  times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 
 }
