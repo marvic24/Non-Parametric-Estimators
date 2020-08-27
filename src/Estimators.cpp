@@ -807,12 +807,12 @@ struct parallel_rolling_tse : public Worker
 //'   sapply(2:NROW(x), function(i) {
 //'      NPE::theilSenEstimator(x[max(1, i-look_back+1):i], y[max(1, i-look_back+1):i])
 //'   })  # end sapply
-//'} 
+//' }  # end rolling_theilsenr
 //' 
-//' # Compare rolling_theilsen() with rolling_theilsenr
-//'all.equal((NPE::rolling_theilsen(vector_x, vector_y, 5 ))[-(1),], 
-//'          t(rolling_theilsenr(vector_x, vector_y, 5)), check.attributes=FALSE)
-//' # Compare the speed of RcppParallel with R code
+//' # Compare rolling_theilsen() with rolling_theilsenr()
+//' all.equal((NPE::rolling_theilsen(vector_x, vector_y, 5 ))[-(1),], 
+//'   t(rolling_theilsenr(vector_x, vector_y, 5)), check.attributes=FALSE)
+//' # Compare the speed of rolling_theilsen() with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
 //'   Rcpp=NPE::rolling_theilsen(vector_x, vector_y, 10),
