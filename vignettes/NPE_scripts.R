@@ -215,6 +215,7 @@ summary(microbenchmark(
 
 # Calculate VTI returns
 re_turns <- zoo::coredata(na.omit(NPE::etf_env$re_turns[, "VTI", drop=FALSE]))
+da_ta <- coredata(re_turns)
 n_rows <- NROW(re_turns)
 
 # Calculate sampled VTI returns
@@ -224,13 +225,18 @@ boot_sample <- lapply(1:1000, function(x) {
 })  # end sapply
 
 
-# Mean and standard error of median estimator from bootstrap
+# Mean and standard error of median and Hodges-Lehmann estimators from bootstrap
+# takes a long time because of NPE::hle() !!!
 boot_data <- sapply(boot_sample, function(sampl_e) {
   c(median_est=NPE::med_ian(sampl_e),
+    hodges_lehmann=NPE::hle(sampl_e), 
     mean_est=mean(sampl_e))
 })  # end sapply
-apply(boot_data, MARGIN=1, function(x) 
+std_errors <- apply(boot_data, MARGIN=1, function(x) 
   c(mean=mean(x), std_error=sd(x)))
+# The ratio of std_error to mean shows that the median has 
+# the smallest standard error of all types of location estimators.
+std_errors[2, ]/std_errors[1, ]
 
 
 # Mean and standard error of MAD estimator from bootstrap
@@ -276,7 +282,7 @@ boot_sample <- lapply(1:1000, function(x) {
 # Mean and standard error of Theil-Sen estimator from bootstrap
 boot_data <- sapply(boot_sample, function(sampl_e) {
   c(theilSen=NPE::theilSenEstimator(sampl_e[, "VTI"], sampl_e[, "XLF"])[2], 
-    least_squares=unname(coef(lm(sampl_e[, "XLF"] ~ sampl_e[, "VTI"]))[2]))
+    least_squares=cov(sampl_e[, "XLF"], sampl_e[, "VTI"])/var(sampl_e[, "VTI"]))
 })  # end sapply
 apply(boot_data, MARGIN=1, function(x) 
   c(mean=mean(x), std_error=sd(x)))
