@@ -1,85 +1,67 @@
-library(HighFreq)
-
-re_turns <- rutils::etf_env$re_turns[,"XLF"]
-library(NPE)
-
-re_turns <- na.omit(re_turns)
+# Calculate VTI returns
+re_turns <- zoo::coredata(na.omit(NPE::etf_env$re_turns[, "VTI", drop=FALSE]))
 n_rows <- NROW(re_turns)
 
-#bootstraping median
+# Calculate sampled VTI returns
 set.seed(1121)
-boot_medians <- sapply(1:100, function(x) {
-  boot_sample <- sample.int(n_rows, replace = TRUE)
-  NPE::med_ian(re_turns[boot_sample])
-})
+boot_sample <- lapply(1:1000, function(x) {
+  re_turns[sample.int(n_rows, replace = TRUE), , drop=FALSE]
+})  # end sapply
 
-#bootstraping Mean
+# Mean and standard errors of location estimators from bootstrap
+boot_data <- sapply(boot_sample, function(sampl_e) {
+  c(median_est=NPE::med_ian(sampl_e),
+    hl_est = NPE::hle(sampl_e),
+    mean_est=mean(sampl_e))
+})  # end sapply
+apply(boot_data, MARGIN=1, function(x) 
+  c(mean=mean(x), std_error=sd(x)))
+
+
+# Mean and standard error of MAD estimator from bootstrap
+boot_data <- sapply(boot_sample, function(sampl_e) {
+  c(mad_est=NPE::calc_mad(sampl_e), std_dev=sd(sampl_e))
+})  # end sapply
+apply(boot_data, MARGIN=1, function(x) 
+  c(mean=mean(x), std_error=sd(x)))
+
+# Mean and standard error of different types of skewness estimators from bootstrap
+boot_data <- sapply(boot_sample, function(sampl_e) {
+  c(pearson_skew=NPE::calc_skew(sampl_e, typ_e="Pearson"),
+    quantile_skew=NPE::calc_skew(sampl_e, typ_e="Quantile"), 
+    nonparametric_skew=NPE::calc_skew(sampl_e, typ_e="Nonparametric"))
+})  # end sapply
+std_errors <- apply(boot_data, MARGIN=1, function(x) 
+  c(mean=mean(x), std_error=sd(x)))
+# The ratio of std_error to mean shows that the Nonparametric skewness 
+# has the smallest standard error of all types of skewness.
+std_errors[2, ]/std_errors[1, ]
+
+# Mean and standard error of medcouple estimator from bootstrap
+boot_data <- sapply(boot_sample, function(sampl_e) {
+  c(med_couple=NPE::med_couple(sampl_e), 
+    pearson_skew=NPE::calc_skew(sampl_e, typ_e="Pearson"))
+})  # end sapply
+apply(boot_data, MARGIN=1, function(x) 
+  c(mean=mean(x), std_error=sd(x)))
+
+
+## Standard error of Theil-Sen estimator
+
+# Calculate VTI and XLF returns for a single month
+re_turns <- zoo::coredata(na.omit(NPE::etf_env$re_turns["2019-11", c("VTI", "XLF")]))
+n_rows <- NROW(re_turns)
+
+# Calculate sampled VTI and XLF returns
 set.seed(1121)
-boot_means <- sapply(1:100, function(x) {
-  boot_sample <- sample.int(n_rows, replace = TRUE)
-  mean(re_turns[boot_sample])
-})
+boot_sample <- lapply(1:1000, function(x) {
+  re_turns[sample.int(n_rows, replace = TRUE), ]
+})  # end sapply
 
-#bootstapping Hodges-Lehmann Estimator
-set.seed(1121)
-boot_hle <- sapply(1:100, function(x) {
-  boot_sample <- sample.int(n_rows, replace = TRUE)
-  NPE::hle(re_turns[boot_sample])
-})
-
-#Mean and standard error for median
-c(mean=mean(boot_medians), std_error=sd(boot_medians))
-
-#Mean and standard error for Hodges-Lehamnn Estimators
-c(mean=mean(boot_hle), std_error=sd(boot_hle))
-
-#Mean and standard error for mean
-c(mean=mean(boot_means), std_error=sd(boot_means))
-
-
-
-#bootstraping Median Absolute Deviations
-set.seed(1121)
-boot_mad <- sapply(1:100, function(x) {
-  boot_sample <- sample.int(n_rows, replace = TRUE)
-  NPE::medianAbsoluteDeviation(re_turns[boot_sample])
-})
-
-#bootstapping Hodges-Lehmann Estimator
-set.seed(1121)
-boot_sd <- sapply(1:100, function(x) {
-  boot_sample <- sample.int(n_rows, replace = TRUE)
-  sd(re_turns[boot_sample])
-})
-
-#Mean and standard error for Median Absolute Deviation
-c(mean=mean(boot_medians), std_error=sd(boot_mad))
-
-#Mean and standard error for Standard Deviations
-c(mean=mean(boot_hle), std_error=sd(boot_sd))
-
-
-library(e1071)
-
-#bootstraping Medcouple
-set.seed(1121)
-boot_mc <- sapply(1:100, function(x) {
-  boot_sample <- sample.int(n_rows, replace = TRUE)
-  NPE::med_couple(re_turns[boot_sample])
-})
-
-#bootstapping Skewness
-set.seed(1121)
-boot_skew <- sapply(1:100, function(x) {
-  boot_sample <- sample.int(n_rows, replace = TRUE)
-  skewness(re_turns[boot_sample])
-})
-
-#Mean and standard error for Medcouple
-c(mean=mean(boot_medians), std_error=sd(boot_mc))
-
-#Mean and standard error for Skewness
-c(mean=mean(boot_hle), std_error=sd(boot_skew))
-
-
-
+# Mean and standard error of Theil-Sen estimator from bootstrap
+boot_data <- sapply(boot_sample, function(sampl_e) {
+  c(theilSen=NPE::theilSenEstimator(sampl_e[, "VTI"], sampl_e[, "XLF"])[2], 
+    least_squares=unname(coef(lm(sampl_e[, "XLF"] ~ sampl_e[, "VTI"]))[2]))
+})  # end sapply
+apply(boot_data, MARGIN=1, function(x) 
+  c(mean=mean(x), std_error=sd(x)))
